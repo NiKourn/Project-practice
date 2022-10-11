@@ -6,6 +6,7 @@ class dbinstall {
 	 * @var string
 	 */
 	private $title = '';
+	
 	/**
 	 * @var
 	 */
