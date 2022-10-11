@@ -2,12 +2,19 @@
 
 class dbinstall {
 	
+	/**
+	 * @var string
+	 */
 	private $title = '';
+	/**
+	 * @var
+	 */
+	public $conn;
 	
 	function __construct( $title ) {
 		$this->title = $title;
 		$this->fetch_db( $title );
-		$this->buildDB();
+		$this->build_db();
 	}
 	
 	/**
@@ -20,6 +27,7 @@ class dbinstall {
 	private function connection( $servername, $root_username, $root_password ) {
 		$conn = new PDO( "mysql:host=$servername;", $root_username, $root_password );
 		$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+		
 		
 		return $conn;
 	}
@@ -118,40 +126,7 @@ class dbinstall {
 	 * @return mixed|void
 	 */
 	private function fetch_db( $title = '' ) {
-		$get_json = file_get_contents( 'assets/json/db-info.json' );
-		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
-		
-		if ( ! empty( $json ) ) {
-			$servername = $json[ 'host' ];
-			$dbname     = $json[ 'db_name' ];
-			$username   = $json[ 'db_username' ];
-			$password   = $json[ 'db_password' ];
-			//make connection and access db to check if there's already a database created with given name from $dbname
-			// $db = new mysqli($json['host'],$json['username'],$json['password']);
-			try {
-				$db    = $this->connection( $servername, $username, $password );
-				$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
-				$stmt  = $db->prepare( $query );
-				$stmt->bindparam( 1, $dbname );
-				$stmt->execute();
-				if ( $stmt->fetch() ) {
-					echo '<br><h2>Database Already Created</h2>';
-					//Header( "Refresh:1;url=homepage.php" );
-				} else {
-					include 'db/db-form.php';
-				}
-				
-			}//end try
-			catch ( PDOException $e ) {
-				include 'db/db-form.php';
-				'Fetch db error:' . $e->getMessage();
-			}
-			
-		}//end if $json empty
-		else {
-			include 'db/db-form.php';
-		}
-		unset( $stmt );
+		$this->json_contents_condition( false, $title );
 	}
 	
 	/**
@@ -175,9 +150,45 @@ class dbinstall {
 	}
 	
 	/**
+	 * @param $return
+	 * @param $title
+	 *
+	 * @return mixed|void|null
+	 */
+	private function json_contents_condition( $return = false, $title = '' ) {
+		$get_json = file_get_contents( 'assets/json/db-info.json' );
+		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
+		
+		if ( ! empty( $json ) ) {
+			$servername = $json[ 'host' ];
+			$dbname     = $json[ 'db_name' ];
+			$username   = $json[ 'db_username' ];
+			$password   = $json[ 'db_password' ];
+			//make connection and access db to check if there's already a database created with given name from $dbname
+			
+			if ( $return === true ) {
+				return $this->access_db( $servername, $dbname, $username, $password, $return );
+			} else {
+				try {
+					$this->access_db( $servername, $dbname, $username, $password, $return, $title );
+					
+				}//end try
+				catch ( PDOException $e ) {
+					include 'db/db-form.php';
+					'Fetch db error:' . $e->getMessage();
+				}
+			}
+		}//end if $json empty
+		elseif ( $return === false ) {
+			include 'db/db-form.php';
+		}
+		unset( $stmt );
+	}
+	
+	/**
 	 * @return void
 	 */
-	private function buildDB() {
+	private function build_db() {
 		if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 			$host          = $_POST[ 'host' ];
 			$db            = $_POST[ 'db_name' ];
@@ -193,31 +204,46 @@ class dbinstall {
 	}
 	
 	/**
-	 * Get db connection array/string
-	 * @return mixed|void
+	 * @return mixed|null
 	 */
 	public function get_db() {
-		$get_json = file_get_contents( 'assets/json/db-info.json' );
-		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
+		//make connection and access db to check if there's already a database created with given name from $dbname
+		if ( isset ( $this->conn ) ) {
+			return $this->json_contents_condition( true );
+		}
+	}
+	
+	/**
+	 * @param $servername
+	 * @param $dbname
+	 * @param $username
+	 * @param $password
+	 * @param $return
+	 *
+	 * @return mixed|void
+	 */
+	private function access_db( $servername, $dbname, $username, $password, $return = false, $title = '' ) {
+		$db    = $this->connection( $servername, $username, $password );
+		$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
+		$stmt  = $db->prepare( $query );
+		if ( $stmt === false ) {
+			return;
+		}
+		$stmt->bindparam( 1, $dbname );
+		$stmt->execute();
+		$this->conn = $stmt->fetch();
 		
-		if ( ! empty( $json ) ) {
-			$servername = $json[ 'host' ];
-			$dbname     = $json[ 'db_name' ];
-			$username   = $json[ 'db_username' ];
-			$password   = $json[ 'db_password' ];
-			//make connection and access db to check if there's already a database created with given name from $dbname
-			// $db = new mysqli($json['host'],$json['username'],$json['password']);
+		if ( $return === true ) {
+			return $this->conn;
 			
-			$db    = $this->connection( $servername, $username, $password );
-			$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
-			$stmt  = $db->prepare( $query );
-			$stmt->bindparam( 1, $dbname );
-			$stmt->execute();
-			
-			return $stmt->fetch();
-			
-		}//end if $json empty
-		unset( $stmt );
+		} else {
+			if ( $this->conn ) {
+				echo '<br><h2>Database Already Created</h2>';
+				//Header( "Refresh:1;url=homepage.php" );
+			} else {
+				include 'db/db-form.php';
+			}
+		}
 	}
 	
 	

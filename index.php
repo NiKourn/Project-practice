@@ -8,6 +8,7 @@ includeLoader::include( 'header', $title );
 <?php
 
 include_once 'db/dbinstall.php';
+	echo '<pre>' . print_r( $db->get_db(), true ) . '</pre>';
 
 
 ?>
