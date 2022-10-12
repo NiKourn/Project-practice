@@ -94,25 +94,6 @@ class dbinstall {
 	}
 	
 	/**
-	 * @return void
-	 */
-	private function build_db() {
-		if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
-			$host          = $_POST[ 'host' ];
-			$db            = $_POST[ 'db_name' ];
-			$root_username = $_POST[ 'root_username' ];
-			$root_password = $_POST[ 'root_password' ];
-			$db_username   = $_POST[ 'db_username' ];
-			$db_password   = $_POST[ 'db_password' ];
-			$charset       = 'utf8mb4';
-			
-			$this->create_db->createDB( $host, $db, $root_username, $root_password, $db_username, $db_password );
-			$this->create_db->createTables( $host, $db, $db_username, $db_password );
-			$this->storeJsonInfo();
-		}
-	}
-	
-	/**
 	 * @param $servername
 	 * @param $dbname
 	 * @param $username
@@ -143,6 +124,25 @@ class dbinstall {
 				$title = $this->get_title();
 				include 'db/db-form.php';
 			}
+		}
+	}
+	
+	/**
+	 * @return void
+	 */
+	private function build_db() {
+		if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+			$host          = $_POST[ 'host' ];
+			$db            = $_POST[ 'db_name' ];
+			$root_username = $_POST[ 'root_username' ];
+			$root_password = $_POST[ 'root_password' ];
+			$db_username   = $_POST[ 'db_username' ];
+			$db_password   = $_POST[ 'db_password' ];
+			$charset       = 'utf8mb4';
+			
+			$this->create_db->createDB( $host, $db, $root_username, $root_password, $db_username, $db_password );
+			$this->create_db->createTables( $host, $db, $db_username, $db_password );
+			$this->storeJsonInfo();
 		}
 	}
 	
