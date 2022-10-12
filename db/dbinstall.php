@@ -5,129 +5,40 @@ class dbinstall {
 	/**
 	 * @var string
 	 */
-	private $title = '';
+	private $title;
 	
 	/**
+	 * Connection return
 	 * @var
 	 */
-	public $conn;
+	private $conn;
 	
-	function __construct( $title ) {
-		$this->title = $title;
-		$this->fetch_db( $title );
+	/**
+	 * insert class into constructor and load it as a parameter
+	 * @var create_db object
+	 */
+	private $create_db;
+	
+	function __construct() {
+		include_once 'create_db.php';
+		$this->create_db = new create_db();
+		$this->fetch_db( );
 		$this->build_db();
 	}
 	
-	/**
-	 * @param $servername
-	 * @param $root_username
-	 * @param $root_password
-	 *
-	 * @return PDO
-	 */
-	private function connection( $servername, $root_username, $root_password ) {
-		$conn = new PDO( "mysql:host=$servername;", $root_username, $root_password );
-		$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		
-		
-		return $conn;
+	public function set_title( $title ) {
+		$this->title = $title;
+	}
+	
+	public function get_title() {
+		return $this->title;
 	}
 	
 	/**
-	 * @param $servername
-	 * @param $username
-	 * @param $password
-	 *
 	 * @return void
 	 */
-	private function createDB( $servername, $dbname, $root_username, $root_password, $db_username, $db_password ) {
-		
-		try {
-			$conn = $this->connection( $servername, $root_username, $root_password );
-			$sql  = "CREATE DATABASE `$dbname`;
-                CREATE USER '$db_username'@'$servername' IDENTIFIED BY '$db_password';
-                GRANT ALL ON `$dbname`.* TO '$db_username'@'$servername';
-                FLUSH PRIVILEGES;";
-			// use exec() because no results are returned
-			$conn->exec( $sql );
-			echo "Database created successfully<br>";
-			
-		} catch ( PDOException $e ) {
-			$e->getMessage();
-		}
-		
-		$conn = null;
-	}
-	
-	/**
-	 * @param $servername
-	 * @param $dbname
-	 * @param $username
-	 * @param $password
-	 *
-	 * @return void
-	 */
-	private function createTables( $servername, $dbname, $username, $password ) {
-		
-		try {
-			
-			$conn = new PDO( "mysql:host=$servername;dbname=$dbname", $username, $password );
-			// set the PDO error mode to exception
-			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-			
-			$sql1 = "CREATE TABLE attendee (
-                attendee_id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                firstname VARCHAR(50) NOT NULL,
-                lastname VARCHAR(50) NOT NULL,
-                dateofbirth DATE,
-                contactnumber VARCHAR(15),
-                emailaddress VARCHAR(50),
-                specialty_id INT(11),
-                avatar_path VARCHAR(200),
-                reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                )";
-			
-			$sql2 = "CREATE TABLE specialties (
-                specialty_id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(50),
-                reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                )";
-			
-			$sql3 = "CREATE TABLE users (
-                id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                username VARCHAR(50),
-                password VARCHAR(50),
-                reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                )";
-			
-			$sql4 = "INSERT INTO `specialties`(`name`) VALUES ('Database Admin'), ('Software Devs'), ('Server Admins'), ('Other')";
-			
-			$sqlqs = [ $sql1, $sql2, $sql3, $sql4 ];
-			
-			// use foreach to browse through arrays and only PDOexec() because no results are returned
-			foreach ( $sqlqs as $sql ) {
-				$conn->exec( $sql );
-				
-				echo "Tables created successfully <br>";
-				Header( "Refresh:3;url=homepage.php" );
-				
-			}
-		} catch ( PDOException $e ) {
-			echo "<br>" . $e->getMessage();
-			//Header("Refresh:1;url=homepage.php");
-		}
-		
-		$conn = null;
-	}
-	
-	
-	/**
-	 * @param $title
-	 *
-	 * @return mixed|void
-	 */
-	private function fetch_db( $title = '' ) {
-		$this->json_contents_condition( false, $title );
+	private function fetch_db( ) {
+		$this->json_contents_condition();
 	}
 	
 	/**
@@ -152,14 +63,12 @@ class dbinstall {
 	
 	/**
 	 * @param $return
-	 * @param $title
 	 *
 	 * @return mixed|void|null
 	 */
-	private function json_contents_condition( $return = false, $title = '' ) {
+	private function json_contents_condition( $return = false ) {
 		$get_json = file_get_contents( 'assets/json/db-info.json' );
 		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
-		
 		if ( ! empty( $json ) ) {
 			$servername = $json[ 'host' ];
 			$dbname     = $json[ 'db_name' ];
@@ -168,19 +77,21 @@ class dbinstall {
 			//make connection and access db to check if there's already a database created with given name from $dbname
 			
 			if ( $return === true ) {
-				return $this->access_db( $servername, $dbname, $username, $password, $return );
+				return $this->access_db( $servername, $dbname, $username, $password,  $return );
 			} else {
 				try {
-					$this->access_db( $servername, $dbname, $username, $password, $return, $title );
+					$this->access_db( $servername, $dbname, $username, $password,  $return );
 					
 				}//end try
 				catch ( PDOException $e ) {
+					$title = $this->get_title();
 					include 'db/db-form.php';
 					'Fetch db error:' . $e->getMessage();
 				}
 			}
 		}//end if $json empty
-		elseif ( $return === false ) {
+		else {
+			$title = $this->get_title();
 			include 'db/db-form.php';
 		}
 		unset( $stmt );
@@ -198,21 +109,13 @@ class dbinstall {
 			$db_username   = $_POST[ 'db_username' ];
 			$db_password   = $_POST[ 'db_password' ];
 			$charset       = 'utf8mb4';
-			$this->createDB( $host, $db, $root_username, $root_password, $db_username, $db_password );
-			$this->createTables( $host, $db, $db_username, $db_password );
+			
+			$this->create_db->createDB( $host, $db, $root_username, $root_password, $db_username, $db_password );
+			$this->create_db->createTables( $host, $db, $db_username, $db_password );
 			$this->storeJsonInfo();
 		}
 	}
 	
-	/**
-	 * @return mixed|null
-	 */
-	public function get_db() {
-		//make connection and access db to check if there's already a database created with given name from $dbname
-		if ( isset ( $this->conn ) ) {
-			return $this->json_contents_condition( true );
-		}
-	}
 	
 	/**
 	 * @param $servername
@@ -223,8 +126,8 @@ class dbinstall {
 	 *
 	 * @return mixed|void
 	 */
-	private function access_db( $servername, $dbname, $username, $password, $return = false, $title = '' ) {
-		$db    = $this->connection( $servername, $username, $password );
+	private function access_db( $servername, $dbname, $username, $password, $return = false ) {
+		$db    = $this->create_db->PDO_connection( $servername, $username, $password );
 		$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
 		$stmt  = $db->prepare( $query );
 		if ( $stmt === false ) {
@@ -242,12 +145,23 @@ class dbinstall {
 				echo '<br><h2>Database Already Created</h2>';
 				//Header( "Refresh:1;url=homepage.php" );
 			} else {
+				$title = $this->get_title();
 				include 'db/db-form.php';
 			}
+		}
+	}
+	
+	/**
+	 * @return void
+	 */
+	public function get_db() {
+		//make connection and access db to check if there's already a database created with given name from $dbname
+		if ( isset ( $this->conn ) ) {
+			return $this->conn;
 		}
 	}
 	
 	
 }
 
-$db = new dbinstall( $title );
+$db = new dbinstall();
