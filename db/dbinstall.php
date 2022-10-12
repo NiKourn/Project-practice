@@ -76,9 +76,6 @@ class dbinstall {
 			$password   = $json[ 'db_password' ];
 			//make connection and access db to check if there's already a database created with given name from $dbname
 			
-			if ( $return === true ) {
-				return $this->access_db( $servername, $dbname, $username, $password,  $return );
-			} else {
 				try {
 					$this->access_db( $servername, $dbname, $username, $password,  $return );
 					
@@ -88,7 +85,6 @@ class dbinstall {
 					include 'db/db-form.php';
 					'Fetch db error:' . $e->getMessage();
 				}
-			}
 		}//end if $json empty
 		else {
 			$title = $this->get_title();
@@ -115,7 +111,6 @@ class dbinstall {
 			$this->storeJsonInfo();
 		}
 	}
-	
 	
 	/**
 	 * @param $servername
