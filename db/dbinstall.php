@@ -156,6 +156,20 @@ class dbinstall {
 		}
 	}
 	
+//	private static $instance;
+//
+//	/**
+//	 * Return the current instance of the class
+//	 *
+//	 * @return object
+//	 */
+//	public static function get_instance() {
+//		if ( null === self::$instance ) {
+//			self::$instance = new self();
+//		}
+//		return self::$instance;
+//	}
+	
 	
 }
 
