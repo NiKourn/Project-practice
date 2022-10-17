@@ -14,17 +14,11 @@ class dbinstall {
 	private $conn;
 	
 	/**
-	 * insert class into constructor and load it as a parameter
+	 * insert create_db object into constructor and load it as a parameter
 	 * @var create_db object
 	 */
 	private $create_db;
 	
-	function __construct() {
-		include_once 'create_db.php';
-		$this->create_db = new create_db();
-		$this->fetch_db( );
-		$this->build_db();
-	}
 	
 	public function set_title( $title ) {
 		$this->title = $title;
@@ -34,13 +28,12 @@ class dbinstall {
 		return $this->title;
 	}
 	
-	/**
-	 * @return void
-	 */
-	private function fetch_db( ) {
-		$this->json_contents_condition();
+	public function init(){
+		include_once 'create_db.php';
+		$this->create_db = new create_db();
+		$this->fetch_connection();
+		$this->build_db();
 	}
-	
 	/**
 	 * @return void
 	 */
@@ -66,28 +59,28 @@ class dbinstall {
 	 *
 	 * @return mixed|void|null
 	 */
-	private function json_contents_condition( $return = false ) {
+	private function fetch_connection( $return = false ) {
 		$get_json = file_get_contents( 'assets/json/db-info.json' );
 		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
-		if ( ! empty( $json ) ) {
+		if ( ! empty( $json ) &&  is_null( $this->get_db() ) ) {
 			$servername = $json[ 'host' ];
 			$dbname     = $json[ 'db_name' ];
 			$username   = $json[ 'db_username' ];
 			$password   = $json[ 'db_password' ];
 			//make connection and access db to check if there's already a database created with given name from $dbname
 			
-				try {
-					$this->access_db( $servername, $dbname, $username, $password,  $return );
-					
-				}//end try
-				catch ( PDOException $e ) {
-					$title = $this->get_title();
-					include 'db/db-form.php';
-					'Fetch db error:' . $e->getMessage();
-				}
+			try {
+				$this->access_db( $servername, $dbname, $username, $password, $return );
+				
+			}//end try
+			catch ( PDOException $e ) {
+				$title = $this->title;
+				include 'db/db-form.php';
+				'Fetch db error:' . $e->getMessage();
+			}
 		}//end if $json empty
 		else {
-			$title = $this->get_title();
+			$title = $this->title;
 			include 'db/db-form.php';
 		}
 		unset( $stmt );
@@ -121,7 +114,8 @@ class dbinstall {
 				echo '<br><h2>Database Already Created</h2>';
 				//Header( "Refresh:1;url=homepage.php" );
 			} else {
-				$title = $this->get_title();
+				echo 'sadasd';
+				$title = $this->title;
 				include 'db/db-form.php';
 			}
 		}
@@ -151,24 +145,9 @@ class dbinstall {
 	 */
 	public function get_db() {
 		//make connection and access db to check if there's already a database created with given name from $dbname
-		if ( isset ( $this->conn ) ) {
-			return $this->conn;
-		}
+		return $this->conn ?? null;
 	}
-	
-//	private static $instance;
-//
-//	/**
-//	 * Return the current instance of the class
-//	 *
-//	 * @return object
-//	 */
-//	public static function get_instance() {
-//		if ( null === self::$instance ) {
-//			self::$instance = new self();
-//		}
-//		return self::$instance;
-//	}
+
 	
 	
 }

@@ -5,7 +5,12 @@ class includeLoader {
 * @var string
 */
 private static string $folder_path = 'includes/';
-	
+
+
+function __construct(){
+	require_once 'classes/scriptLoader.php';
+}
+
 	/**
 	 * @param $file_name
 	 * @param $title
