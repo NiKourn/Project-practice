@@ -8,7 +8,6 @@ private static string $folder_path = 'includes/';
 
 
 function __construct(){
-	require_once 'classes/scriptLoader.php';
 }
 
 	/**

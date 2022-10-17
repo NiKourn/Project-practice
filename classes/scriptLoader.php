@@ -13,7 +13,7 @@ class scriptLoader {
 	 * @var array|string[]
 	 */
 	private array $filenames_needles = [
-		'trait', 'interface', 'abstract', 'class', 'template', 'function'
+		'template', 'db'
 	];
 	
 	public function __construct() {

@@ -1,15 +1,20 @@
 <?php
 require_once 'classes/scriptLoader.php';
-include_once 'db/dbinstall.php';
-$db->set_title('Database Configuration');
-if (! $db->get_db()) {
-	$db->init();
-}
 
-includeLoader::include( 'header', $db->get_title() );
+
+includeLoader::include( 'header' );
 ?>
 
 <?php
+
+
+echo "<div class=''>";
+$count = 0;
+foreach ( get_included_files() as $included_file ) {
+	echo $count . '. ' . $included_file . '<br>';
+	$count ++;
+}
+echo "</div>";
 
 
 ?>

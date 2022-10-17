@@ -19,6 +19,12 @@ class dbinstall {
 	 */
 	private $create_db;
 	
+	function __construct() {
+		
+		$this->init();
+		
+	}
+	
 	
 	public function set_title( $title ) {
 		$this->title = $title;
@@ -28,12 +34,15 @@ class dbinstall {
 		return $this->title;
 	}
 	
-	public function init(){
-		include_once 'create_db.php';
+	public function init() {
+		//include_once 'create_db.php';
 		$this->create_db = new create_db();
 		$this->fetch_connection();
-		$this->build_db();
+		if ( ! $this->get_db() ) {
+			$this->build_db();
+		}
 	}
+	
 	/**
 	 * @return void
 	 */
@@ -60,9 +69,9 @@ class dbinstall {
 	 * @return mixed|void|null
 	 */
 	private function fetch_connection( $return = false ) {
-		$get_json = file_get_contents( 'assets/json/db-info.json' );
+		$get_json = file_get_contents( 'assets/jSon/db-info.json' );
 		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
-		if ( ! empty( $json ) &&  is_null( $this->get_db() ) ) {
+		if ( ! empty( $json ) && ! $this->get_db() ) {
 			$servername = $json[ 'host' ];
 			$dbname     = $json[ 'db_name' ];
 			$username   = $json[ 'db_username' ];
@@ -75,13 +84,16 @@ class dbinstall {
 			}//end try
 			catch ( PDOException $e ) {
 				$title = $this->title;
-				include 'db/db-form.php';
+				echo 'inside fetch connection PDOException';
+				include 'includes/db-form.php';
 				'Fetch db error:' . $e->getMessage();
 			}
 		}//end if $json empty
 		else {
 			$title = $this->title;
-			include 'db/db-form.php';
+			echo 'Else if jSon empty';
+			
+			include 'includes/db-form.php';
 		}
 		unset( $stmt );
 	}
@@ -116,7 +128,7 @@ class dbinstall {
 			} else {
 				echo 'sadasd';
 				$title = $this->title;
-				include 'db/db-form.php';
+				include 'includes/db-form.php';
 			}
 		}
 	}
@@ -145,11 +157,10 @@ class dbinstall {
 	 */
 	public function get_db() {
 		//make connection and access db to check if there's already a database created with given name from $dbname
-		return $this->conn ?? null;
+		return $this->conn;
 	}
-
 	
 	
 }
 
-$db = new dbinstall();
+new dbinstall();
