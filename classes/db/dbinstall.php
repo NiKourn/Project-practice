@@ -25,15 +25,10 @@ class dbinstall {
 		
 	}
 	
-	
-	public function set_title( $title ) {
-		$this->title = $title;
-	}
-	
-	public function get_title() {
-		return $this->title;
-	}
-	
+	/**
+	 * Initialize db Installation
+	 * @return void
+	 */
 	public function init() {
 		//include_once 'create_db.php';
 		$this->create_db = new create_db();
@@ -85,15 +80,14 @@ class dbinstall {
 			catch ( PDOException $e ) {
 				$title = $this->title;
 				echo 'inside fetch connection PDOException';
-				include 'includes/db-form.php';
+				includeLoader::include('db-form', 'Database Configuration');
 				'Fetch db error:' . $e->getMessage();
 			}
 		}//end if $json empty
 		else {
 			$title = $this->title;
 			echo 'Else if jSon empty';
-			
-			include 'includes/db-form.php';
+			includeLoader::include('db-form', 'Database Configuration');
 		}
 		unset( $stmt );
 	}
@@ -128,7 +122,7 @@ class dbinstall {
 			} else {
 				echo 'sadasd';
 				$title = $this->title;
-				include 'includes/db-form.php';
+				includeLoader::include('db-form', 'Database Configuration');
 			}
 		}
 	}

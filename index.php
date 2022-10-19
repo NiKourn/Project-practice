@@ -2,7 +2,7 @@
 require_once 'classes/scriptLoader.php';
 
 
-includeLoader::include( 'header' );
+includeLoader::include( 'header', 'a title' );
 ?>
 
 <?php
