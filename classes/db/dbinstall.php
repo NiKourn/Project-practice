@@ -3,11 +3,6 @@
 class dbinstall {
 	
 	/**
-	 * @var string
-	 */
-	private $title;
-	
-	/**
 	 * Connection return
 	 * @var
 	 */
@@ -33,7 +28,7 @@ class dbinstall {
 		//include_once 'create_db.php';
 		$this->create_db = new create_db();
 		$this->fetch_connection();
-		if ( ! $this->get_db() ) {
+		if ( ! $this->get_db() && ! $this->fetch_connection() ) {
 			$this->build_db();
 		}
 	}
@@ -58,6 +53,12 @@ class dbinstall {
 		file_put_contents( $json_file, $json_out );
 	}
 	
+	public static function explodeJson(){
+		$json_file=file_get_contents('assets/json/db-info.json');
+		$json = json_decode($json_file);
+		return $json;
+	}
+	
 	/**
 	 * @param $return
 	 *
@@ -78,15 +79,13 @@ class dbinstall {
 				
 			}//end try
 			catch ( PDOException $e ) {
-				$title = $this->title;
-				echo 'inside fetch connection PDOException';
+				echo 'No connection! Please check your connection details';
 				includeLoader::include('db-form', 'Database Configuration');
 				'Fetch db error:' . $e->getMessage();
 			}
 		}//end if $json empty
 		else {
-			$title = $this->title;
-			echo 'Else if jSon empty';
+			echo 'Configuration file is empty';
 			includeLoader::include('db-form', 'Database Configuration');
 		}
 		unset( $stmt );
@@ -118,10 +117,9 @@ class dbinstall {
 		} else {
 			if ( $this->conn ) {
 				echo '<br><h2>Database Already Created</h2>';
-				//Header( "Refresh:1;url=homepage.php" );
+				Header( "Refresh:1;url=app.php" );
 			} else {
 				echo 'sadasd';
-				$title = $this->title;
 				includeLoader::include('db-form', 'Database Configuration');
 			}
 		}

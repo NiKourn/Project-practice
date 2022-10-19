@@ -2,19 +2,16 @@
 <?php
 //Reload this page and do the posting action on this page
 //htmlentities can strip down the exploitation by hackers
+$json = dbinstall::explodeJson();
 ?>
 <form action="<?php echo htmlentities( $_SERVER[ 'PHP_SELF' ] ); ?>" method="post" enctype="multipart/form-data">
 	<div class="mb-3">
 		<label for="host" class="form-label">Server IP</label>
-		<input type="text" name="host" class="form-control" id="host" aria-describedby="" value="<?php if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
-			echo $_POST[ 'host' ];
-		} ?>">
+		<input type="text" name="host" class="form-control" id="host" aria-describedby="" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'host' ] : ( isset ( $json->host ) ?$json->host: '' ); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="root_username" class="form-label">Server Username</label>
-		<input type="text" name="root_username" class="form-control" id="root_username" aria-describedby="emailHelp" value="<?php if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
-			echo $_POST[ 'root_username' ];
-		} ?>">
+		<input type="text" name="root_username" class="form-control" id="root_username" aria-describedby="emailHelp" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'root_username' ] : ( isset ( $json->root_username ) ?$json->root_username: '' ); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="root_password" class="form-label">Server Password</label>
@@ -24,15 +21,11 @@
 	
 	<div class="mb-3">
 		<label for="db_name" class="form-label">Database Name</label>
-		<input type="text" name="db_name" class="form-control" id="db_name" aria-describedby="" value="<?php if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
-			echo $_POST[ 'db_name' ];
-		} ?>">
+		<input type="text" name="db_name" class="form-control" id="db_name" aria-describedby="" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'db_name' ] : ( isset ( $json->db_name ) ?$json->db_name: '' ); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="db_username" class="form-label">Database Username</label>
-		<input type="text" name="db_username" class="form-control" id="db_username" aria-describedby="emailHelp" value="<?php if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
-			echo $_POST[ 'db_username' ];
-		} ?>">
+		<input type="text" name="db_username" class="form-control" id="db_username" aria-describedby="emailHelp" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'db_username' ] : ( isset ( $json->db_username ) ?$json->db_username: '' ); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="db_password" class="form-label">Database Password</label>

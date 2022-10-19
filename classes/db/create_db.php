@@ -146,12 +146,12 @@ class create_db {
 			foreach ( $create_tables_into_array as $query ) {
 				$conn->exec( $query );
 				echo "Tables created successfully <br>";
-				Header( "Refresh:3;url=homepage.php" );
+				Header( "Refresh:3;url=app.php" );
 				
 			}
 		} catch ( PDOException $e ) {
 			echo "<br>" . $e->getMessage();
-			//Header("Refresh:1;url=homepage.php");
+			Header("Refresh:1;url=index.php");
 		}
 		
 		$conn = null;
