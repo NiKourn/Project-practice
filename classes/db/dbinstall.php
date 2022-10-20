@@ -137,7 +137,7 @@ class dbinstall {
 			
 			$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $_POST[ 'root_password' ], $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
 			
-			if ( ! $this->get_db() && ! empty( $this->json_file ) ) {
+			if ( ! $this->get_db()) {
 				
 					$this->create_db->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
 					$this->create_db->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
