@@ -10,3 +10,8 @@
 	<title><?php echo $title; ?></title>
 </head>
 <body>
+<?php
+require_once 'classes/autoload_classes.php';
+if ( ! dbinstall::get_db() ) {
+	Header('Refresh:1;url=index.php');
+}

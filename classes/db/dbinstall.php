@@ -6,7 +6,7 @@ class dbinstall {
 	 * Connection return
 	 * @var
 	 */
-	private $conn;
+	private static $conn;
 	
 	/**
 	 * insert create_db object into constructor and load it as a parameter
@@ -14,6 +14,10 @@ class dbinstall {
 	 */
 	private $create_db;
 	
+	/**
+	 * Store Json file to check if its empty throughout class
+	 * @var json_file not needed yet...
+	 */
 	private $json_file;
 	
 	function __construct() {
@@ -88,12 +92,12 @@ class dbinstall {
 			catch ( PDOException $e ) {
 				echo 'No connection! Please check your connection details';
 				includeLoader::include( 'db-form', 'Database Configuration' );
-				'Fetch db error:' . $e->getMessage();
-			}
+				exit();			}
 		}//end if $json empty
 		else {
 			echo 'Configuration file is empty. Enter details here to Build Database';
 			includeLoader::include( 'db-form', 'Database Configuration' );
+			
 		}
 		unset( $stmt );
 	}
@@ -117,15 +121,16 @@ class dbinstall {
 		}
 		$stmt->bindparam( 1, $dbname );
 		$stmt->execute();
-		$this->conn = $stmt->fetch();
+		self::$conn = $stmt->fetch();
 		
-			if ( $this->conn ) {
-				echo '<br><h2>Database Already Created</h2>';
+			if ( self::$conn ) {
+				echo '<br><h2>Database Already Created, Redirecting...</h2>';
 				die();
 				Header( "Refresh:1;url=app.php" );
 			} else {
 				echo 'Something is wrong with your Configuration file';
 				includeLoader::include( 'db-form', 'Database Configuration' );
+				exit();
 		}
 	}
 	
@@ -165,10 +170,11 @@ class dbinstall {
 	/**
 	 * @return mixed
 	 */
-	public function get_db() {
+	public static function get_db() {
 		//make connection and access db to check if there's already a database created with given name from $dbname
-		return $this->conn;
+		return self::$conn;
 	}
+	
 	
 	
 }

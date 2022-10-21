@@ -1,6 +1,6 @@
 <?php
 
-class scriptLoader {
+class autoLoad {
 	
 	/**
 	 * Folders have to have the same name with the files inside.
@@ -72,4 +72,4 @@ class scriptLoader {
 	
 }
 
-$loaderClass = new scriptLoader();
+$loaderClass = new autoLoad();

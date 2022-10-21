@@ -1,4 +1,8 @@
 <?php
+require __DIR__ . '/load.php';
+includeLoader::include( 'header', 'Project title' );
+
+
 echo '<h1>App Page: Connection with db succesfull</h1>';
 
 echo "<div class=''>";
@@ -8,3 +12,5 @@ foreach ( get_included_files() as $included_file ) {
 	$count ++;
 }
 echo "</div>";
+
+echo dirname( __DIR__ );
