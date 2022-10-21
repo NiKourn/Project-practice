@@ -151,7 +151,7 @@ class create_db {
 			}
 		} catch ( PDOException $e ) {
 			echo "<br>" . $e->getMessage();
-			Header("Refresh:1;url=index.php");
+			//Header("Refresh:1;url=index.php");
 		}
 		
 		$conn = null;

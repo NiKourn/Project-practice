@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 class includeLoader {
 	
@@ -7,6 +8,7 @@ class includeLoader {
 	 */
 	private static string $folder_path = 'includes/';
 	
+	private static string $title;
 	
 	function __construct() {
 	}
@@ -19,6 +21,11 @@ class includeLoader {
 	 */
 	public static function include( $file_name, $title = '' ) {
 		include_once self::$folder_path . $file_name . '.php';
+		self::$title = $title;
+	}
+	
+	public static function get_title(){
+		return self::$title;
 	}
 	
 }

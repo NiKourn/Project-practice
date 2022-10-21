@@ -20,8 +20,14 @@ class dbinstall {
 	 */
 	private $json_file;
 	
+	/**
+	 * @var
+	 */
+	private $nonce_class;
+	
+	
 	function __construct() {
-		if ( ! $this->get_db() ) {
+		if ( ! self::get_db() ) {
 			$this->init();
 		} else {
 			//Header( "Refresh:1;url=app.php" );
@@ -34,7 +40,7 @@ class dbinstall {
 	 * @return void
 	 */
 	public function init() {
-		//include_once 'create_db.php';
+		include_once 'create_db.php';
 		$this->create_db = new create_db();
 		$this->fetch_connection();
 		$this->build_db();
@@ -43,8 +49,8 @@ class dbinstall {
 	/**
 	 * @return void
 	 */
-	private function put_Json_content($host, $db_name, $root_username, $root_password, $db_username, $db_password) {
-		$json_file = 'assets/json/db-info.json';
+	private function put_Json_content( $host, $db_name, $root_username, $root_password, $db_username, $db_password ) {
+		$json_file = ABSPATH . 'assets/json/db-info.json';
 		$json_raw  = file_get_contents( $json_file );
 		$json      = json_decode( $json_raw );
 		$json      = [
@@ -61,7 +67,7 @@ class dbinstall {
 	}
 	
 	public static function explodeJson() {
-		$json_file = file_get_contents( 'assets/json/db-info.json' );
+		$json_file = file_get_contents( ABSPATH . 'assets/json/db-info.json' );
 		$json      = json_decode( $json_file );
 		
 		return $json;
@@ -72,12 +78,12 @@ class dbinstall {
 	 *
 	 * @return mixed|void|null
 	 */
-	private function fetch_connection( ) {
-		$get_json        = file_get_contents( 'assets/jSon/db-info.json' );
-		$json            = json_decode( $get_json, true ); // decode the JSON into an associative array
+	private function fetch_connection() {
+		$get_json = file_get_contents( ABSPATH . 'assets/jSon/db-info.json' );
+		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
 		
 		$this->json_file = $json;
-		if ( ! empty( $json ) && ! $this->get_db() ) {
+		if ( ! empty( $json ) && ! self::get_db() ) {
 			$servername = $json[ 'host' ];
 			$dbname     = $json[ 'db_name' ];
 			$username   = $json[ 'db_username' ];
@@ -86,20 +92,21 @@ class dbinstall {
 			//make connection and access db to check if there's already a database created with given name from $dbname
 			
 			try {
-				return $this->access_db( $servername, $dbname, $username, $password);
+				return $this->access_db( $servername, $dbname, $username, $password );
 				
 			}//end try
 			catch ( PDOException $e ) {
 				echo 'No connection! Please check your connection details';
 				includeLoader::include( 'db-form', 'Database Configuration' );
-				exit();			}
+				//exit();
+			}
 		}//end if $json empty
 		else {
 			echo 'Configuration file is empty. Enter details here to Build Database';
 			includeLoader::include( 'db-form', 'Database Configuration' );
-			
+			//exit();
 		}
-		unset( $stmt );
+		//unset( $stmt );
 	}
 	
 	/**
@@ -123,15 +130,15 @@ class dbinstall {
 		$stmt->execute();
 		self::$conn = $stmt->fetch();
 		
-			if ( self::$conn ) {
-				echo '<br><h2>Database Already Created, Redirecting...</h2>';
-				die();
-				Header( "Refresh:1;url=app.php" );
-			} else {
-				echo 'Something is wrong with your Configuration file';
-				includeLoader::include( 'db-form', 'Database Configuration' );
-				exit();
+		if ( self::$conn ) {
+//			Header( "Location: app.php" );
+//			echo '<br><h2>Database Already Created, Redirecting...</h2>';
+//			exit();
+		} else {
+			echo 'Something is wrong with your Configuration file';
+			includeLoader::include( 'db-form', 'Database Configuration' );
 		}
+		unset( $stmt );
 	}
 	
 	/**
@@ -139,17 +146,35 @@ class dbinstall {
 	 */
 	private function build_db() {
 		if ( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
-			
-			$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $_POST[ 'root_password' ], $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
-			
-			if ( ! $this->get_db()) {
-				
-					$this->create_db->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
-					$this->create_db->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
-				}
-			} else {
-				echo 'Error Establishing Database Connection';
+			$token     = $_POST['token'] ;
+			$testnonce = verifyNonce( $token );
+			echo '<pre>' . print_r($token, true) . '</pre>';
+			echo '<pre>' . print_r($_SESSION, true) . '</pre>';
+			if ( $testnonce){
+				echo 'true';
+			}else{
+				echo 'false';
 			}
+			
+			if ( $testnonce === false ) {
+				return;
+			}
+			
+			
+			if ( empty( $_POST[ 'token' ] ) ) {
+				return;
+			}
+			die();
+			unset($_SESSION, $token);
+		$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $_POST[ 'root_password' ], $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
+		
+			
+			if ( ! self::get_db() ) {
+				
+				$this->create_db->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
+				$this->create_db->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
+			}
+		}
 		
 	}
 	
@@ -163,7 +188,8 @@ class dbinstall {
 		$json[ 'root_password' ] = $root_password;
 		$json[ 'db_username' ]   = $db_username;
 		$json[ 'db_password' ]   = $db_password;
-		$this->put_Json_content($host, $db_name, $root_username, $root_password, $db_username, $db_password);
+		$this->put_Json_content( $host, $db_name, $root_username, $root_password, $db_username, $db_password );
+		
 		return $json;
 	}
 	
@@ -174,7 +200,6 @@ class dbinstall {
 		//make connection and access db to check if there's already a database created with given name from $dbname
 		return self::$conn;
 	}
-	
 	
 	
 }

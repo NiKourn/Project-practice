@@ -7,7 +7,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/' );
 }
-
+define('NONCE_SECRET', 'CEIUHET745T$^&%&%^gFGBF$^');
 /*
  * The error_reporting() function can be disabled in php.ini. On systems where that is the case,
  * it's best to add a dummy function to the wp-config.php file, but as this call to the function
@@ -24,65 +24,4 @@ if ( function_exists( 'error_reporting' ) ) {
 }
 
 require_once (ABSPATH . 'includeLoader.php');
-
-/*
- * If wp-config.php exists in the WordPress root, or if it exists in the root and wp-settings.php
- * doesn't, load wp-config.php. The secondary check for wp-settings.php has the added benefit
- * of avoiding cases where the current directory is a nested installation, e.g. / is WordPress(a)
- * and /blog/ is WordPress(b).
- *
- * If neither set of conditions is true, initiate loading the setup process.
- */
-//if ( file_exists( ABSPATH . 'config.php' ) ) {
-//
-//	/** The config file resides in ABSPATH */
-//	require_once ABSPATH . 'config.php';
-//
-//} elseif ( @file_exists( dirname( ABSPATH ) . '/-config.php' ) && ! @file_exists( dirname( ABSPATH ) . '/wp-settings.php' ) ) {
-//
-//	/** The config file resides one level above ABSPATH but is not part of another installation */
-//	require_once dirname( ABSPATH ) . '/assets/jSon/config.php';
-//
-//} else {
-	
-	// A config file doesn't exist.
-	
-///
-	
-	//require_once ABSPATH . WPINC . '/functions.php';
-	
-	
-	/*
-	 * We're going to redirect to setup-config.php. While this shouldn't result
-	 * in an infinite loop, that's a silly thing to assume, don't you think? If
-	 * we're traveling in circles, our last-ditch effort is "Need more help?"
-	 */
-//	if ( false === strpos( $_SERVER['REQUEST_URI'], 'setup-config' ) ) {
-//		header( 'Location: ' . $path );
-//		exit;
-//	}
-
-//	define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
-//	require_once ABSPATH . WPINC . '/version.php';
-
-	// Die with an error message.
-//	$die = '<p>' . sprintf(
-//		/* translators: %s: wp-config.php */
-//			__( "There doesn't seem to be a %s file. I need this before we can get started." ),
-//			'<code>wp-config.php</code>'
-//		) . '</p>';
-//	$die .= '<p>' . sprintf(
-//		/* translators: 1: Documentation URL, 2: wp-config.php */
-//			__( 'Need more help? <a href="%1$s">Read the support article on %2$s</a>.' ),
-//			__( 'https://wordpress.org/support/article/editing-wp-config-php/' ),
-//			'<code>wp-config.php</code>'
-//		) . '</p>';
-//	$die .= '<p>' . sprintf(
-//		/* translators: %s: wp-config.php */
-//			__( "You can create a %s file through a web interface, but this doesn't work for all server setups. The safest way is to manually create the file." ),
-//			'<code>wp-config.php</code>'
-//		) . '</p>';
-//	$die .= '<p><a href="' . $path . '" class="button button-large">' . __( 'Create a Configuration File' ) . '</a></p>';
-//
-//	wp_die( $die, __( 'WordPress &rsaquo; Error' ) );
-//}
+require_once (ABSPATH . 'functions.php');

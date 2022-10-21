@@ -1,3 +1,5 @@
+<?php
+session_start();?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,6 +14,13 @@
 <body>
 <?php
 require_once 'classes/autoload_classes.php';
-if ( ! dbinstall::get_db() ) {
-	Header('Refresh:1;url=index.php');
-}
+//$count = 1;
+//foreach ( get_included_files() as $included_file ) {
+//	echo $count . '. ' . $included_file . '<br>';
+//	$count ++;
+//	ECHO 'hello world';
+//}
+//echo "</div>";
+//die();
+
+

@@ -1,7 +1,6 @@
 <?php
 require __DIR__ . '/load.php';
-includeLoader::include( 'header', 'Project title' );
-
+includeLoader::include( 'header', 'App123 title' );
 
 echo '<h1>App Page: Connection with db succesfull</h1>';
 

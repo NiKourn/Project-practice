@@ -33,5 +33,11 @@ $json = dbinstall::explodeJson();
 	</div>
 	
 	<button type="submit" class="btn btn-primary" value="login">Install App</button>
+	
+	<?php
+	$token = generateNonce(10, 'dbform', 20);
+	$_SESSION['token'] = $token;
+	?>
+	<input type='hidden' name='token' value='<?php echo $token;?>'/>
 	<br/>
 </form>
