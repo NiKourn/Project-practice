@@ -7,11 +7,11 @@ $json = dbinstall::explodeJson();
 <form action="<?php echo htmlentities( $_SERVER[ 'PHP_SELF' ] ); ?>" method="post" enctype="multipart/form-data">
 	<div class="mb-3">
 		<label for="host" class="form-label">Server IP</label>
-		<input type="text" name="host" class="form-control" id="host" aria-describedby="" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'host' ] : ( isset ( $json->host ) ?$json->host: '' ); ?>">
+		<input type="text" name="host" class="form-control" id="host" aria-describedby="" value="<?php echo ( isset($_POST[ 'host' ]) ? $_POST[ 'host' ] : ( isset ( $json->host ) ? $json->host : '' )); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="root_username" class="form-label">Server Username</label>
-		<input type="text" name="root_username" class="form-control" id="root_username" aria-describedby="emailHelp" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'root_username' ] : ( isset ( $json->root_username ) ?$json->root_username: '' ); ?>">
+		<input type="text" name="root_username" class="form-control" id="root_username" aria-describedby="emailHelp" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'root_username' ] : ( isset ( $json->root_username ) ? $json->root_username : '' ); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="root_password" class="form-label">Server Password</label>
@@ -21,11 +21,11 @@ $json = dbinstall::explodeJson();
 	
 	<div class="mb-3">
 		<label for="db_name" class="form-label">Database Name</label>
-		<input type="text" name="db_name" class="form-control" id="db_name" aria-describedby="" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'db_name' ] : ( isset ( $json->db_name ) ?$json->db_name: '' ); ?>">
+		<input type="text" name="db_name" class="form-control" id="db_name" aria-describedby="" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'db_name' ] : ( isset ( $json->db_name ) ? $json->db_name : '' ); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="db_username" class="form-label">Database Username</label>
-		<input type="text" name="db_username" class="form-control" id="db_username" aria-describedby="emailHelp" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'db_username' ] : ( isset ( $json->db_username ) ?$json->db_username: '' ); ?>">
+		<input type="text" name="db_username" class="form-control" id="db_username" aria-describedby="emailHelp" value="<?php echo $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ? $_POST[ 'db_username' ] : ( isset ( $json->db_username ) ? $json->db_username : '' ); ?>">
 	</div>
 	<div class="mb-3">
 		<label for="db_password" class="form-label">Database Password</label>
@@ -33,11 +33,12 @@ $json = dbinstall::explodeJson();
 	</div>
 	
 	<button type="submit" class="btn btn-primary" value="login">Install App</button>
-	
 	<?php
-	$token = generateNonce(10, 'dbform', 20);
-	$_SESSION['token'] = $token;
+	//generate a token store it as a cookie and in post variable to pass it to class
+	$nonce               = new Nonce();
+	$token               = $nonce->generateNonce( 10, 'dbform', 20 );
+	$_SESSION[ 'dbform-token' ] = $_POST[ 'dbform-token' ] = $token;
 	?>
-	<input type='hidden' name='token' value='<?php echo $token;?>'/>
+	<input type='hidden' name='dbform-token' value='<?php echo $token; ?>'/>
 	<br/>
 </form>

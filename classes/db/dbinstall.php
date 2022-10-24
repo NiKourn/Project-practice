@@ -23,7 +23,7 @@ class dbinstall {
 	/**
 	 * @var
 	 */
-	private $nonce_class;
+	private $error_code;
 	
 	
 	function __construct() {
@@ -41,6 +41,7 @@ class dbinstall {
 	 */
 	public function init() {
 		include_once 'create_db.php';
+		//include_once ABSPATH . 'classes/nonce/nonce.php';
 		$this->create_db = new create_db();
 		$this->fetch_connection();
 		$this->build_db();
@@ -96,15 +97,13 @@ class dbinstall {
 				
 			}//end try
 			catch ( PDOException $e ) {
-				echo 'No connection! Please check your connection details';
 				includeLoader::include( 'db-form', 'Database Configuration' );
-				//exit();
+				echo $this->error_code = 'No connection! Please check your connection details at file db-info.json or check if database/username exists';
 			}
 		}//end if $json empty
 		else {
-			echo 'Configuration file is empty. Enter details here to Build Database';
 			includeLoader::include( 'db-form', 'Database Configuration' );
-			//exit();
+			echo $this->error_code = 'Empty db-info.json file';
 		}
 		//unset( $stmt );
 	}
@@ -135,8 +134,8 @@ class dbinstall {
 //			echo '<br><h2>Database Already Created, Redirecting...</h2>';
 //			exit();
 		} else {
-			echo 'Something is wrong with your Configuration file';
 			includeLoader::include( 'db-form', 'Database Configuration' );
+			echo $this->error_code = 'Something wrong with the database';
 		}
 		unset( $stmt );
 	}
@@ -145,27 +144,34 @@ class dbinstall {
 	 * @return void
 	 */
 	private function build_db() {
-			$token     = $_SESSION['token'] ;
-			$testnonce = verifyNonce( $token );
-			
-			if ( $testnonce === false ) {
-				return;
-			}
-			
-			if ( empty( $_SESSION[ 'token' ] ) || empty ($_POST['token']) ) {
-				return;
-			}
-			unset($_SESSION, $token);
-			//add details to Json before creating something to store info
-		$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $_POST[ 'root_password' ], $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
-		die();
-			
-			if ( ! self::get_db() ) {
-				
-				$this->create_db->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
-				$this->create_db->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
-			}
+		$nonce = new Nonce;
+		$token = ( isset ( $_POST[ 'dbform-token' ] ) ? $_POST[ 'dbform-token' ] : '' );
+		$testnonce = $nonce->verifyNonce( $token );
+		//if verification is false die
 		
+		if ( $testnonce === false ) {
+			//throw new \Exception( 'Nonce validation not complete' );
+			return;
+		}
+		
+		//if empty or not same session and post supervariables the return false
+		if ( ( ! isset( $_SESSION[ 'dbform-token' ] ) || ! isset ( $_POST[ 'dbform-token' ] ) ) || ( $_SESSION[ 'dbform-token' ] !== $_POST[ 'dbform-token' ] ) ) {
+			//throw new \Exception('Tokens need to be same for you to proceed with database and tables creation');
+			return;
+		}
+		
+		if ( ! isset( $_POST[ 'host' ] ) || ! isset( $_POST[ 'db_name' ] ) ) {
+			return;
+		}
+		//add details to Json before creating db/tables to store info, since nonce return true
+		$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $_POST[ 'root_password' ], $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
+		if ( ! self::get_db() ) {
+			//Create db and tables if db is not existent
+			$this->create_db->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
+			$this->create_db->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
+		}
+		//unset nonce variables
+		unset( $_SESSION, $token, $_POST );
 	}
 	
 	/**
@@ -190,6 +196,11 @@ class dbinstall {
 		//make connection and access db to check if there's already a database created with given name from $dbname
 		return self::$conn;
 	}
+	
+//	private function error_code_msg($message){
+//		$this->error_code = $message;
+//		return $message;
+//	}
 	
 	
 }
