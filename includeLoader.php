@@ -6,7 +6,7 @@ class includeLoader {
 	/**
 	 * @var string
 	 */
-	private static string $folder_path = 'includes/';
+	private static string $folder_path = ABSPATH . 'includes/';
 	
 	private static string $title;
 	

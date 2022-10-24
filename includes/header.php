@@ -13,14 +13,6 @@ session_start();?>
 </head>
 <body>
 <?php
-require_once 'classes/autoload_classes.php';
-//$count = 1;
-//foreach ( get_included_files() as $included_file ) {
-//	echo $count . '. ' . $included_file . '<br>';
-//	$count ++;
-//	ECHO 'hello world';
-//}
-//echo "</div>";
-//die();
+require_once ABSPATH . 'classes/autoload_classes.php';
 
 

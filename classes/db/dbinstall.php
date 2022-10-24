@@ -29,10 +29,7 @@ class dbinstall {
 	function __construct() {
 		if ( ! self::get_db() ) {
 			$this->init();
-		} else {
-			//Header( "Refresh:1;url=app.php" );
 		}
-		
 	}
 	
 	/**
@@ -43,7 +40,7 @@ class dbinstall {
 		include_once 'create_db.php';
 		//include_once ABSPATH . 'classes/nonce/nonce.php';
 		$this->create_db = new create_db();
-		$this->fetch_connection();
+		
 		$this->build_db();
 	}
 	
@@ -103,7 +100,12 @@ class dbinstall {
 		}//end if $json empty
 		else {
 			includeLoader::include( 'db-form', 'Database Configuration' );
+//			ob_start( );
+//			Header( "Location: /includes/db-form.php" );
+//			ob_flush();
+			//echo "<script type='text/javascript'>  window.location.replace('/includes/db-form.php'); </script>";
 			echo $this->error_code = 'Empty db-info.json file';
+			exit(0);
 		}
 		//unset( $stmt );
 	}
@@ -144,6 +146,10 @@ class dbinstall {
 	 * @return void
 	 */
 	private function build_db() {
+		// if connection exists end function
+		if ( $this->fetch_connection()){
+			return;
+		}
 		$nonce = new Nonce;
 		$token = ( isset ( $_POST[ 'dbform-token' ] ) ? $_POST[ 'dbform-token' ] : '' );
 		$testnonce = $nonce->verifyNonce( $token );

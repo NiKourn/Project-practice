@@ -6,7 +6,7 @@ class autoLoad {
 	 * Folders have to have the same name with the files inside.
 	 * @var string
 	 */
-	private string $folder_path = 'classes/*';
+	private string $folder_path = ABSPATH . 'classes/*';
 	
 	/**
 	 * Add filename/directories needle if needed. !! ATTN both folders and files must contain the needle so structure must stay like as it is else includes will not be loaded!!
