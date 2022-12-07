@@ -1,4 +1,4 @@
-<?php
+<?php session_start();
 /**
  * Bootstrap file for setting the ABSPATH constant
  * - and most important include files
