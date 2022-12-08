@@ -2,6 +2,10 @@
 
 abstract class create_db {
 	
+	function __construct(){
+	
+	}
+	
 	/**
 	 * @param $servername
 	 * @param $root_username
@@ -104,6 +108,9 @@ abstract class create_db {
 		return $query;
 	}
 	
+	/**
+	 * @return string
+	 */
 	private function create_table_options() {
 		$query = "CREATE TABLE IF NOT EXISTS options (
                 id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -147,12 +154,9 @@ abstract class create_db {
 			foreach ( $create_tables_into_array as $query ) {
 				$conn->exec( $query );
 				echo "Tables created successfully <br>";
-				Header( "Refresh:3;url=app.php" );
-				
 			}
 		} catch ( PDOException $e ) {
 			echo "<br>" . $e->getMessage();
-			//Header("Refresh:1;url=index.php");
 		}
 		
 		$conn = null;

@@ -1,15 +1,14 @@
 <?php
 require __DIR__ . '/load.php';
 echo "<div class=''>";
-
 includeLoader::include( 'header', 'Project title' );
-if ( dbinstall::get_db() ) {
-	ob_start();
-	Header( "Location: app.php" );
-	//Header( "Refresh:2;url=app.php" );
-	echo '<br><h2>Database Already Created, Redirecting...</h2>';
-	ob_get_clean();
-}
+//autoload initialized classes like db built and fetch
+
+//if ( ! dbinstall::get_db() ) {
+//	clear_html_contents();
+//	redirect( 'index.php' );
+//	echo '<br><h2>Database Already Created, Redirecting...</h2>';
+//}
 
 //echo "<div class=''>";
 //$count = 1;

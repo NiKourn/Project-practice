@@ -27,6 +27,8 @@ class dbinstall extends create_db {
 	
 	
 	function __construct() {
+		parent::__construct();
+		
 		if ( ! self::get_db() ) {
 			$this->init();
 		}
@@ -37,7 +39,6 @@ class dbinstall extends create_db {
 	 * @return void
 	 */
 	public function init() {
-		//include_once ABSPATH . 'classes/nonce/nonce.php';
 		
 		$this->build_db();
 	}
@@ -62,7 +63,7 @@ class dbinstall extends create_db {
 		file_put_contents( $json_file, $json_out );
 	}
 	
-	public static function explodeJson() {
+	public static function jSon_decode() {
 		$json_file = file_get_contents( ABSPATH . 'assets/json/db-info.json' );
 		$json      = json_decode( $json_file );
 		
@@ -149,6 +150,7 @@ class dbinstall extends create_db {
 	}
 	
 	/**
+	 * Build Database after some nonce validation
 	 * @return void
 	 */
 	private function build_db() {
@@ -189,6 +191,7 @@ class dbinstall extends create_db {
 		}
 		//unset nonce variables
 		unset( $_SESSION, $token, $_POST );
+
 	}
 	
 	/**

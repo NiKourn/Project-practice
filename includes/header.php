@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,7 +11,16 @@
 </head>
 <body>
 <div class="container-lg">
-<?php
-require_once ABSPATH . 'classes/autoload_classes.php';
-
-
+	<div class="row">
+		<?php
+		require_once ABSPATH . 'classes/autoload_classes.php';
+		
+		$count = 1;
+		foreach ( get_included_files() as $included_file ) {
+			echo $count . '. ' . $included_file . '<br>';
+			$count ++;
+		}
+		?>
+	</div>
+	<?php
+	
