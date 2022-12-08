@@ -7,6 +7,7 @@
 - Need to rethink how Title is going to work (maybe another class or function)
 - Need to insert option_value and option_name in options table
 - Need to make SQL statements for a bunch of stuff
+- Search for actions or something to run stuff from different parts of the theme
 
 ### v beta0.1.0
 - When docker implementation is done, finish feature into develop branch

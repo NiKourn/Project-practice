@@ -40,7 +40,7 @@ $json = dbinstall::explodeJson();
 	</div>
 	<div class="mb-3">
 		<label for="db_password" class="form-label">Database Password</label>
-		<input type="password" name="db_password" class="form-control" id="db_password">
+		<input type="password" name="db_password" class="form-control" id="db_password" placeholder="Enter your password">
 	</div>
 	
 	<button type="submit" class="btn btn-primary" value="login">Install App</button>

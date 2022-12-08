@@ -1,6 +1,6 @@
 <?php
 
-class dbinstall {
+class dbinstall extends create_db {
 	
 	/**
 	 * Connection return
@@ -37,9 +37,7 @@ class dbinstall {
 	 * @return void
 	 */
 	public function init() {
-		include_once 'create_db.php';
 		//include_once ABSPATH . 'classes/nonce/nonce.php';
-		$this->create_db = new create_db();
 		
 		$this->build_db();
 	}
@@ -89,14 +87,11 @@ class dbinstall {
 			
 			//make connection and access db to check if there's already a database created with given name from $dbname
 			
-			try {
-				return $this->access_db( $servername, $dbname, $username, $password );
-				
-			}//end try
-			catch ( PDOException $e ) {
+			if ( ! $this->access_db( $servername, $dbname, $username, $password ) ) {
 				includeLoader::include( 'db-form', 'Database Configuration' );
 				echo $this->error_code = 'No connection! Please check your connection details at file db-info.json or check if database/username exists';
 			}
+			
 		}//end if $json empty
 		else {
 			includeLoader::include( 'db-form', 'Database Configuration' );
@@ -105,7 +100,7 @@ class dbinstall {
 //			ob_flush();
 			//echo "<script type='text/javascript'>  window.location.replace('/includes/db-form.php'); </script>";
 			echo $this->error_code = 'Empty db-info.json file';
-			exit(0);
+			exit( 0 );
 		}
 		//unset( $stmt );
 	}
@@ -115,31 +110,42 @@ class dbinstall {
 	 * @param $dbname
 	 * @param $username
 	 * @param $password
-	 * @param $return
 	 *
-	 * @return mixed|void
+	 * @return false|string|void
 	 */
 	private function access_db( $servername, $dbname, $username, $password ) {
 		//$this->storeJsonInfo();
-		$db    = $this->create_db->PDO_connection( $servername, $username, $password );
-		$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
-		$stmt  = $db->prepare( $query );
-		if ( $stmt === false ) {
-			return;
-		}
-		$stmt->bindparam( 1, $dbname );
-		$stmt->execute();
-		self::$conn = $stmt->fetch();
-		
-		if ( self::$conn ) {
+		try {
+			$db = $this->PDO_connection( $servername, $username, $password );
+			
+			if ( ! $db ) {
+				unset ( $db );
+				
+				return false;
+			}
+			
+			$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
+			$stmt  = $db->prepare( $query );
+			if ( $stmt === false ) {
+				return;
+			}
+			$stmt->bindparam( 1, $dbname );
+			$stmt->execute();
+			self::$conn = $stmt->fetch();
+			
+			if ( self::$conn ) {
 //			Header( "Location: app.php" );
-//			echo '<br><h2>Database Already Created, Redirecting...</h2>';
+				return '<br><h2>Database Already Created, Redirecting...</h2>';
 //			exit();
-		} else {
-			includeLoader::include( 'db-form', 'Database Configuration' );
-			echo $this->error_code = 'Something wrong with the database';
+			} else {
+				includeLoader::include( 'db-form', 'Database Configuration' );
+				
+				return $this->error_code = 'Something wrong with the database';
+			}
+			unset( $stmt );
+		} catch ( PDOException $e ) {
+			$e->getMessage();
 		}
-		unset( $stmt );
 	}
 	
 	/**
@@ -147,15 +153,15 @@ class dbinstall {
 	 */
 	private function build_db() {
 		// if connection exists end function
-		if ( $this->fetch_connection()){
+		if ( $this->fetch_connection() ) {
 			return;
 		}
-		$nonce = new Nonce;
-		$token = ( isset ( $_POST[ 'dbform-token' ] ) ? $_POST[ 'dbform-token' ] : '' );
+		$nonce     = new Nonce;
+		$token     = ( isset ( $_POST[ 'dbform-token' ] ) ? $_POST[ 'dbform-token' ] : '' );
 		$testnonce = $nonce->verifyNonce( $token );
-		//if verification is false die
 		
-		if ( $testnonce === false ) {
+		//if verification is false die
+		if ( $testnonce === false ) {echo 'test';
 			//throw new \Exception( 'Nonce validation not complete' );
 			return;
 		}
@@ -169,12 +175,16 @@ class dbinstall {
 		if ( ! isset( $_POST[ 'host' ] ) || ! isset( $_POST[ 'db_name' ] ) ) {
 			return;
 		}
+		
+		$root_password = htmlspecialchars( $_POST[ 'root_password' ] );
+		
 		//add details to Json before creating db/tables to store info, since nonce return true
-		$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $_POST[ 'root_password' ], $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
+		$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $root_password, $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
+		
 		if ( ! self::get_db() ) {
 			//Create db and tables if db is not existent
-			$this->create_db->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
-			$this->create_db->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
+			$this->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
+			$this->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
 		}
 		//unset nonce variables
 		unset( $_SESSION, $token, $_POST );
@@ -202,7 +212,7 @@ class dbinstall {
 		//make connection and access db to check if there's already a database created with given name from $dbname
 		return self::$conn;
 	}
-	
+
 //	private function error_code_msg($message){
 //		$this->error_code = $message;
 //		return $message;

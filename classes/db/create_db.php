@@ -1,30 +1,31 @@
 <?php
 
-class create_db {
+abstract class create_db {
 	
 	/**
 	 * @param $servername
-	 * @param $username
-	 * @param $password
+	 * @param $root_username
+	 * @param $root_password
 	 * @param $dbname
 	 * @param $before_creating_db
 	 *
-	 * @return PDO
+	 * @return PDO|void
 	 */
-	public function PDO_connection( $servername, $username, $password, $dbname = '', $before_creating_db = true ) {
-		
+	public function PDO_connection( $servername, $root_username, $root_password, $dbname = '', $before_creating_db = true ) {
 		if ( $before_creating_db === true ) {
-			$conn = new PDO( "mysql:host=$servername;", $username, $password );
-			// set the PDO error mode to exception
-			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+				$conn = new PDO( "mysql:host=$servername;", $root_username, $root_password );
+				// set the PDO error mode to exception
+				$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			return $conn;
+			
 		} else {
-			$conn = new PDO( "mysql:host=$servername;dbname=$dbname", $username, $password );
-			// set the PDO error mode to exception
-			//PDO::ATTR_PERSISTENT => true;
-			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		}
+				$conn = new PDO( "mysql:host=$servername;dbname=$dbname", $root_username, $root_password );
+				// set the PDO error mode to exception
+				//PDO::ATTR_PERSISTENT => true;
+				$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+				return $conn;
+				}
 		
-		return $conn;
 	}
 	
 	/**
@@ -38,13 +39,14 @@ class create_db {
 	 * @return void
 	 */
 	public function createDB( $servername, $dbname, $root_username, $root_password, $db_username, $db_password ) {
-		
 		try {
 			$conn = $this->PDO_connection( $servername, $root_username, $root_password );
-			$sql  = "CREATE DATABASE `$dbname`;
-                CREATE USER '$db_username'@'$servername' IDENTIFIED BY '$db_password';
-                GRANT ALL ON `$dbname`.* TO '$db_username'@'$servername';
-                FLUSH PRIVILEGES;";
+			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			$sql  = "CREATE DATABASE IF NOT EXISTS `$dbname`;
+					USE `$dbname`;
+                    CREATE USER IF NOT EXISTS '$db_username'@'$servername' IDENTIFIED BY '$db_password';
+                    GRANT ALL ON `$dbname`.* TO '$db_username'@'$servername';
+                    FLUSH PRIVILEGES;";
 			// use exec() because no results are returned
 			$conn->exec( $sql );
 			echo "Database created successfully<br>";
@@ -53,7 +55,6 @@ class create_db {
 			$e->getMessage();
 		}
 		
-		$conn = null;
 	}
 	
 	/**
@@ -61,7 +62,7 @@ class create_db {
 	 */
 	private function create_table_attendee() {
 		
-		$query = "CREATE TABLE attendee (
+		$query = "CREATE TABLE IF NOT EXISTS attendee (
                 attendee_id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                 firstname VARCHAR(50) NOT NULL,
                 lastname VARCHAR(50) NOT NULL,
@@ -80,7 +81,7 @@ class create_db {
 	 * @return string
 	 */
 	private function create_table_specialties() {
-		$query = "CREATE TABLE specialties (
+		$query = "CREATE TABLE IF NOT EXISTS specialties (
                 specialty_id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(50),
                 reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -93,7 +94,7 @@ class create_db {
 	 * @return string
 	 */
 	private function create_table_users() {
-		$query = "CREATE TABLE users (
+		$query = "CREATE TABLE IF NOT EXISTS users (
                 id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                 username VARCHAR(50),
                 password VARCHAR(50),
@@ -104,7 +105,7 @@ class create_db {
 	}
 	
 	private function create_table_options() {
-		$query = "CREATE TABLE options (
+		$query = "CREATE TABLE IF NOT EXISTS options (
                 id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                 option_name VARCHAR(50),
                 option_value VARCHAR(50)

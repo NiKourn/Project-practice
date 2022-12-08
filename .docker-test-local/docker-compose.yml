@@ -15,10 +15,15 @@ services:
       - test_stack
 
   php:
-    container_name: php-8.1
+    container_name: php
     build: conf
     ports:
       - 9000:9000
+    environment:
+      MYSQL_HOST: database:3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: zbIpY6+9R7PZe//MwkXO7mnvIH4Xdwk6
+#      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
     volumes:
       - ./../:/var/www/html:rw
       - ./sesh:/var/cpanel/php/sessions/ea-php74:rw
@@ -29,20 +34,29 @@ services:
 
   db:
     container_name: database
-    image: mariadb:latest
+    image: mysql
     command: --max_allowed_packet=1073741824
-    restart: no
     ports:
       - '3306:3306'
+    expose:
+          # Opens port 3306 on the container
+      - '3306'
     environment:
-      DB_HOST: localhost
-      MARIADB_ROOT_PASSWORD: root
+      DB_HOST: 172.17.240.1
+#      MARIADB_ROOT_PASSWORD: root
 #      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-#    volumes:
-#      - db_data:/var/lib/mysql
+#      MYSQL_USER: root
+#      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: nick
+      MYSQL_PASSWORD: nick
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+    volumes:
+      - db_data:/var/lib/mysql
     networks:
       - test_stack
 networks:
   test_stack:
+volumes:
+  db_data:
