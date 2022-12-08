@@ -8,6 +8,7 @@
 - Need to insert option_value and option_name in options table
 - Need to make SQL statements for a bunch of stuff
 - Search for actions or something to run stuff from different parts of the theme
+- Write a class for erroring with bootstrap stuff
 
 ### v beta0.1.0
 - When docker implementation is done, finish feature into develop branch

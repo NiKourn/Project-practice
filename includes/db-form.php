@@ -4,13 +4,13 @@
 //?>
 <h1 class="text-center"><?php //echo $title; ?></h1>
 <?php
-echo "<div class=''>";
+echo "<div class='.row'>";
 $count = 1;
 foreach ( get_included_files() as $included_file ) {
 	echo $count . '. ' . $included_file . '<br>';
 	$count ++;
 }
-echo "</div>";
+
 //Reload this page and do the posting action on this page
 //htmlentities can strip down the exploitation by hackers
 $json = dbinstall::explodeJson();
@@ -53,3 +53,4 @@ $json = dbinstall::explodeJson();
 	<input type='hidden' name='dbform-token' value='<?php echo $token; ?>'/>
 	<br/>
 </form>
+echo "</div>";

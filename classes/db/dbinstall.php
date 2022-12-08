@@ -154,6 +154,7 @@ class dbinstall extends create_db {
 	private function build_db() {
 		// if connection exists end function
 		if ( $this->fetch_connection() ) {
+			$this->error_code = 'Database already exists! Redirecting...(Need to redirect somehow)';
 			return;
 		}
 		$nonce     = new Nonce;
@@ -161,14 +162,14 @@ class dbinstall extends create_db {
 		$testnonce = $nonce->verifyNonce( $token );
 		
 		//if verification is false die
-		if ( $testnonce === false ) {echo 'test';
-			//throw new \Exception( 'Nonce validation not complete' );
+		if ( $testnonce === false ) {
+			$this->error_code = 'Form validation is incomplete';
 			return;
 		}
 		
-		//if empty or not same session and post supervariables the return false
+		//if empty or not same session and post supervariables then return false
 		if ( ( ! isset( $_SESSION[ 'dbform-token' ] ) || ! isset ( $_POST[ 'dbform-token' ] ) ) || ( $_SESSION[ 'dbform-token' ] !== $_POST[ 'dbform-token' ] ) ) {
-			//throw new \Exception('Tokens need to be same for you to proceed with database and tables creation');
+			$this->error_code = 'Form is not submitted, something wrong with the form token';
 			return;
 		}
 		

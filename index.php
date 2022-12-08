@@ -4,10 +4,11 @@ echo "<div class=''>";
 
 includeLoader::include( 'header', 'Project title' );
 if ( dbinstall::get_db() ) {
+	ob_start();
 	Header( "Location: app.php" );
 	//Header( "Refresh:2;url=app.php" );
 	echo '<br><h2>Database Already Created, Redirecting...</h2>';
-exit;
+	ob_get_clean();
 }
 
 //echo "<div class=''>";

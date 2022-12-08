@@ -11,6 +11,7 @@
 	<title><?php echo $title; ?></title>
 </head>
 <body>
+<div class="container-lg">
 <?php
 require_once ABSPATH . 'classes/autoload_classes.php';
 
