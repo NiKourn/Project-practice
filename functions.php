@@ -15,7 +15,7 @@ function redirect( string $url, int $delay_in_milisecs = 0 ) {
 }
 
 function clear_html_contents(){
-	$string = '<script type=\"javascript\">';
+	$string = '<script type="javascript">';
 	$string .= 'document.body.innerHTMl = "";';
 	$string .= '</script>';
 	

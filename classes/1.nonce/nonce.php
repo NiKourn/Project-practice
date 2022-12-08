@@ -40,6 +40,7 @@ class Nonce {
 		if ( is_string( $form_id ) == false ) {
 			throw new InvalidArgumentException( "A valid Form ID is required" );
 		}
+		
 		//group Generated Nonces and store with md5 Hash
 		$_SESSION[ 'nonce' ][ $form_id ] = md5( $nonce );
 		
@@ -64,7 +65,7 @@ class Nonce {
 			throw new InvalidArgumentException( "A valid Nonce Secret is required" );
 		}
 		//generate our salt
-		$salt = self::generateSalt( $length );
+		$salt = $this->generateSalt( $length );
 		//convert the time to seconds
 		$time = time() + ( 60 * intval( $expiry_time ) );
 		//concatenate tokens to hash
@@ -72,7 +73,7 @@ class Nonce {
 		//send this to the user with the hashed tokens
 		$nonce = $salt . ':' . $form_id . ':' . $time . ':' . hash( 'sha256', $toHash );
 		//store Nonce
-		self::storeNonce( $form_id, $nonce );
+		$this->storeNonce( $form_id, $nonce );
 		
 		//return nonce
 		return $nonce;
@@ -108,7 +109,10 @@ class Nonce {
 		//check if nonce is present in the session
 		if ( isset( $_SESSION[ 'nonce' ][ $form_id ] ) ) {
 			//check if hashed value matches
+			echo '<pre>' . print_r($nonce . '   ', true) . '</pre>';
+			echo '<pre>' . print_r($_SESSION[ 'nonce' ][ $form_id ] . ' md5=' . md5( $nonce ), true) . '</pre>';
 			if ( $_SESSION[ 'nonce' ][ $form_id ] !== md5( $nonce ) ) {
+				
 				return;
 			}
 		} else {

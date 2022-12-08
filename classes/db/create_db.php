@@ -47,9 +47,8 @@ abstract class create_db {
 			$conn = $this->PDO_connection( $servername, $root_username, $root_password );
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 			$sql  = "CREATE DATABASE IF NOT EXISTS `$dbname`;
-					USE `$dbname`;
-                    CREATE USER IF NOT EXISTS '$db_username'@'$servername' IDENTIFIED BY '$db_password';
-                    GRANT ALL ON `$dbname`.* TO '$db_username'@'$servername';
+                    CREATE USER IF NOT EXISTS `$db_username`@'%' IDENTIFIED BY '$db_password';
+                    GRANT ALL ON `$dbname`.* TO '$db_username'@'%';
                     FLUSH PRIVILEGES;";
 			// use exec() because no results are returned
 			$conn->exec( $sql );

@@ -26,7 +26,7 @@ services:
 #      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
     volumes:
       - ./../:/var/www/html:rw
-      - ./sesh:/var/cpanel/php/sessions/ea-php74:rw
+      - ./sesh:/var/cpanel/php/sessions/ea-php80:rw
     depends_on:
       - db
     networks:
@@ -42,7 +42,7 @@ services:
           # Opens port 3306 on the container
       - '3306'
     environment:
-      DB_HOST: 172.17.240.1
+      DB_HOST: db #172.17.240.1
 #      MARIADB_ROOT_PASSWORD: root
 #      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
 #      MYSQL_USER: root
@@ -50,13 +50,15 @@ services:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_USER: nick
       MYSQL_PASSWORD: nick
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
-      MYSQL_RANDOM_ROOT_PASSWORD: true
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/newmysql
     networks:
       - test_stack
 networks:
   test_stack:
 volumes:
   db_data:
+
+# +wsK1rWy/ZiXlIG2A5Znu/3Im64yzNHe

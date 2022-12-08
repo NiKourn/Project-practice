@@ -33,12 +33,12 @@ $json = dbinstall::jSon_decode();
 		<input type="password" name="db_password" class="form-control" id="db_password" placeholder="Enter your password">
 	</div>
 	
-	<button type="submit" class="btn btn-primary" value="login">Install App</button>
+	<button type="submit" name='submit' class="btn btn-primary" value="login">Install App</button>
 	<?php
 	//generate a token store it as a cookie and in post variable to pass it to class
 	$nonce               = new Nonce();
 	$token               = $nonce->generateNonce( 10, 'dbform', 20 );
-	$_SESSION[ 'dbform-token' ] = $_POST[ 'dbform-token' ] = $token;
+	$_SESSION[ 'dbform-token' ] = $token;
 	?>
 	<input type='hidden' name='dbform-token' value='<?php echo $token; ?>'/>
 	<br/>
