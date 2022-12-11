@@ -2,7 +2,7 @@
 
 abstract class create_db {
 	
-	function __construct(){
+	function __construct() {
 	
 	}
 	
@@ -15,20 +15,23 @@ abstract class create_db {
 	 *
 	 * @return PDO|void
 	 */
-	public function PDO_connection( $servername, $root_username, $root_password, $dbname = '', $before_creating_db = true ) {
+	public function PDO_connection( $servername, $username, $password, $dbname = '', $before_creating_db = true ) {
 		if ( $before_creating_db === true ) {
-				$conn = new PDO( "mysql:host=$servername;", $root_username, $root_password );
-				// set the PDO error mode to exception
-				$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			$conn = new PDO( "mysql:host=$servername;", $username, $password );
+			// set the PDO error mode to exception
+			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			
 			return $conn;
 			
 		} else {
-				$conn = new PDO( "mysql:host=$servername;dbname=$dbname", $root_username, $root_password );
-				// set the PDO error mode to exception
-				//PDO::ATTR_PERSISTENT => true;
-				$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-				return $conn;
-				}
+			
+			$conn = new PDO( "mysql:host=$servername;dbname=$dbname", $username, $password );
+			// set the PDO error mode to exception
+			//PDO::ATTR_PERSISTENT => true;
+			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			
+			return $conn;
+		}
 		
 	}
 	
@@ -42,11 +45,11 @@ abstract class create_db {
 	 *
 	 * @return void
 	 */
-	public function createDB( $servername, $dbname, $root_username, $root_password, $db_username, $db_password ) {
+	protected function createDB( $servername, $dbname, $root_username, $root_password, $db_username, $db_password ) {
 		try {
 			$conn = $this->PDO_connection( $servername, $root_username, $root_password );
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-			$sql  = "CREATE DATABASE IF NOT EXISTS `$dbname`;
+			$sql = "CREATE DATABASE IF NOT EXISTS `$dbname`;
                     CREATE USER IF NOT EXISTS `$db_username`@'%' IDENTIFIED BY '$db_password';
                     GRANT ALL ON `$dbname`.* TO '$db_username'@'%';
                     FLUSH PRIVILEGES;";
@@ -137,7 +140,7 @@ abstract class create_db {
 	 *
 	 * @return void
 	 */
-	public function createTables( $servername, $dbname, $username, $password ) {
+	protected function createTables( $servername, $dbname, $username, $password ) {
 		
 		try {
 			$conn                     = $this->PDO_connection( $servername, $username, $password, $dbname, false );

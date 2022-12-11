@@ -14,7 +14,7 @@
 	<div class="row">
 		<?php
 		require_once ABSPATH . 'classes/autoload_classes.php';
-		
+		//redirect_if_db_exists();
 		$count = 1;
 		foreach ( get_included_files() as $included_file ) {
 			echo $count . '. ' . $included_file . '<br>';

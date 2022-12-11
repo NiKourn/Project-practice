@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Creates database from jSon file
+ */
 class dbinstall extends create_db {
 	
 	/**
@@ -28,24 +31,53 @@ class dbinstall extends create_db {
 	
 	function __construct() {
 		parent::__construct();
+		//Cannot redirect from constructor, it runs from theme header which causes loops (loading in every single page of the theme to test if there's a database connection or not)
+		//Check function
 		
-		if ( ! self::get_db_conn() ) {
-			$this->init();
-		} else {
+		if ( $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/index.php' ) {
 			clear_html_contents();
+			echo '<pre>' . print_r( dbinstall::get_db_conn(), true ) . '</pre>';
 			redirect( 'app.php' );
+			exit( 0 );
 		}
+		if ( ! $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] !== '/index.php' ) {
+			$this->init();
+			redirect( 'index.php' );
+			echo '<pre>' . print_r( dbinstall::get_db_conn() . 'are we here', true ) . '</pre>';
+			exit( 0 );
+			
+		}
+		
+		if ( ! $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/index.php' ) {
+			$this->init();
+			echo '<pre>' . print_r( dbinstall::get_db_conn(), true ) . '</pre>';
+			
+		}
+		
+		if ( $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/app.php' ) {
+			die();
+		}
+		
 	}
 	
 	/**
 	 * Initialize db Installation
 	 * @return void
 	 */
-	public function init() {
+	private function init() {
 		$this->build_db();
 	}
 	
 	/**
+	 * Put the jSon information from the $_POST variable
+	 *
+	 * @param $host
+	 * @param $db_name
+	 * @param $root_username
+	 * @param $root_password
+	 * @param $db_username
+	 * @param $db_password
+	 *
 	 * @return void
 	 */
 	private function put_Json_content( $host, $db_name, $root_username, $root_password, $db_username, $db_password ) {
@@ -66,6 +98,7 @@ class dbinstall extends create_db {
 	}
 	
 	/**
+	 * Decode our Json file and use it to extract the array in form
 	 * @return mixed
 	 */
 	public static function jSon_decode() {
@@ -76,7 +109,8 @@ class dbinstall extends create_db {
 	}
 	
 	/**
-	 * @return bool
+	 * Fetch our connection based on access_db method using the jSon saved contents
+	 * @return false|string|null
 	 */
 	private function fetch_connection() {
 		$get_json = file_get_contents( ABSPATH . 'assets/jSon/db-info.json' );
@@ -92,8 +126,8 @@ class dbinstall extends create_db {
 			//make connection and access db to check if there's already a database created with given name from $dbname
 			
 			if ( ! $this->access_db( $servername, $dbname, $username, $password ) ) {
-//				includeLoader::include( 'db-form', 'Database Configuration' );
-//				echo $this->error_code = 'No connection! Please check your connection details at file db-info.json or check if database/username exists';
+				echo $this->error_code = 'No connection! Please check your connection details at file db-info.json or check if database/username exists';
+				
 				return false;
 				
 			}
@@ -106,10 +140,12 @@ class dbinstall extends create_db {
 		}
 		
 		//unset( $stmt );
-		return true;
+		return self::$conn = $this->access_db( $servername, $dbname, $username, $password );
 	}
 	
 	/**
+	 * Access our db if successfully return an array of the db name
+	 *
 	 * @param $servername
 	 * @param $dbname
 	 * @param $username
@@ -118,13 +154,12 @@ class dbinstall extends create_db {
 	 * @return false|string|void
 	 */
 	private function access_db( $servername, $dbname, $username, $password ) {
-		//$this->storeJsonInfo();
 		try {
 			$db = $this->PDO_connection( $servername, $username, $password, $dbname, false );
-			
-			if ( ! $db ) {
-				return false;
-			}
+//			if(! $db){
+//				echo 'Check your credentials';
+//				return;
+//			}
 			$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
 			$stmt  = $db->prepare( $query );
 			if ( $stmt === false ) {
@@ -132,66 +167,69 @@ class dbinstall extends create_db {
 			}
 			$stmt->bindparam( 1, $dbname );
 			$stmt->execute();
-			self::$conn = $stmt->fetch();
+			$stmt_fetch = $stmt->fetch();
 			
 			if ( self::$conn ) {
 				return '<br><h2>Database Already Created, Redirecting...</h2>';
-//			exit();
 			}
-			//unset( $stmt );
+			
+			return $stmt_fetch;
 		} catch ( PDOException $e ) {
 			$e->getMessage();
 		}
+		
 	}
 	
 	/**
-	 * @return true|void
+	 * Build our database if passed onwards conditions
+	 * @return bool|void
 	 */
 	private function build_db() {
 		
-				if ( ! $this->fetch_connection() ) {
+		if ( ! $this->fetch_connection() ) {
+			
+			if ( ! $this->nonce_validation() ) {
+				$this->error_code = 'Nonce validation failed';
 				
-				if (! $this->nonce_validation()){
-					$this->error_code = 'Nonce validation failed';
-					return;
-				}
-				
-				$root_password = htmlspecialchars( $_POST[ 'root_password' ] );
-				
-				
-				//if(isset ( $_POST[ 'submit' ] )) {
-				//add details to Json before creating db/tables to store info, since nonce return true
-				$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $root_password, $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
-				
-				//Create db and tables if db is not existent
-				$this->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
-				$this->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ] );
-				redirect('app.php');
-				return true;
+				return;
 			}
+			
+			$root_password = htmlspecialchars( $_POST[ 'root_password' ] );
+			
+			
+			//if(isset ( $_POST[ 'submit' ] )) {
+			//add details to Json before creating db/tables to store info, since nonce return true
+			$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $root_password, $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
+			
+			//Create db and tables if db is not existent
+			$this->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
+			$this->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ] );
+			redirect( 'app.php' );
+			
+			return true;
+		}
 		
+		return false;
 	}
 	
 	/**
+	 * Validate nonce for db-forms for security reasons, used in build db method
 	 * @return array|void
 	 */
 	private function nonce_validation() {
-		includeLoader::include(  'db-form', 'Database Configuration' );
-		$nonce     = new Nonce;
-		$token     = ( isset ( $_POST[ 'dbform-token' ] ) ? $_POST[ 'dbform-token' ] : '' );
+//		includeLoader::include(  'db-form', 'Database Configuration' );
+		include 'includes/db-form.php';
+		
 		$testnonce = $nonce->verifyNonce( $token );
-		echo '<pre>' . print_r($_SESSION, true) . '</pre>';
-		echo '<pre>' . print_r($_POST, true) . '</pre>';
-		DIE();
 		//if verification is false die
 		if ( ! $testnonce ) {
 			echo $this->error_code = 'Form validation is incomplete';
 			
 			return;
 		}
-
-		//if empty or not same session and post supervariables then return false
-		if ( ( ! isset( $_SESSION[ 'dbform-token' ] ) || ! isset ( $_POST[ 'dbform-token' ] ) ) || ( $_SESSION[ 'dbform-token' ] !== $_POST[ 'dbform-token' ] ) ) {
+		
+		//if empty session return false
+		if ( ( ! isset( $_SESSION[ 'nonce' ][ 'dbform' ] ) ) ) {
 			echo $this->error_code = 'Form is not submitted, something wrong with the form token';
 			
 			return;
@@ -200,13 +238,14 @@ class dbinstall extends create_db {
 		if ( ! isset( $_POST[ 'host' ] ) || ! isset( $_POST[ 'db_name' ] ) ) {
 			return;
 		}
+		
 		return $testnonce;
 	}
 	
 	/**
 	 * @return array
 	 */
-	public function form_post_details( $host, $db_name, $root_username, $root_password, $db_username, $db_password ) {
+	private function form_post_details( $host, $db_name, $root_username, $root_password, $db_username, $db_password ) {
 		$json[ 'host' ]          = $host;
 		$json[ 'db_name' ]       = $db_name;
 		$json[ 'root_username' ] = $root_username;

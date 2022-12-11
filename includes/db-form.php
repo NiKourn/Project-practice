@@ -38,9 +38,9 @@ $json = dbinstall::jSon_decode();
 	//generate a token store it as a cookie and in post variable to pass it to class
 	$nonce               = new Nonce();
 	$token               = $nonce->generateNonce( 10, 'dbform', 20 );
-	$_SESSION[ 'dbform-token' ] = $token;
+	//$_SESSION['nonce'][ 'dbform' ] = $token;
 	?>
-	<input type='hidden' name='dbform-token' value='<?php echo $token; ?>'/>
+	<input type='hidden' name='dbform' value='<?php echo $token; ?>'/>
 	<br/>
 </form>
 <?php

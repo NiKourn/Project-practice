@@ -102,6 +102,7 @@ class Nonce {
 		$oldHash = $split[ 3 ];
 		//check if the time has expired
 		if ( time() > $time ) {
+			
 			return;
 		}
 		/* Nonce is proving to be valid, continue ... */
@@ -109,8 +110,6 @@ class Nonce {
 		//check if nonce is present in the session
 		if ( isset( $_SESSION[ 'nonce' ][ $form_id ] ) ) {
 			//check if hashed value matches
-			echo '<pre>' . print_r($nonce . '   ', true) . '</pre>';
-			echo '<pre>' . print_r($_SESSION[ 'nonce' ][ $form_id ] . ' md5=' . md5( $nonce ), true) . '</pre>';
 			if ( $_SESSION[ 'nonce' ][ $form_id ] !== md5( $nonce ) ) {
 				
 				return;
