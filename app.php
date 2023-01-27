@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/load.php';
 includeLoader::include( 'header', 'App123 title' );
-
+echo '<pre>' . print_r(dbinstall::get_db_conn(), true) . '</pre>';
 echo '<h1>App Page: Connection with db succesfull</h1>';
 //echo "<div class=''>";
 //$count = 1;

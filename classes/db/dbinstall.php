@@ -34,28 +34,32 @@ class dbinstall extends create_db {
 		//Cannot redirect from constructor, it runs from theme header which causes loops (loading in every single page of the theme to test if there's a database connection or not)
 		//Check function
 		
-		if ( $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/index.php' ) {
-			clear_html_contents();
-			echo '<pre>' . print_r( dbinstall::get_db_conn(), true ) . '</pre>';
+		if ( $this->fetch_connection() && ($_SERVER[ 'REQUEST_URI' ] === '/index.php' || $_SERVER[ 'REQUEST_URI' ] === '/') ) {
+			//clear_html_contents();
+			//echo '<pre>' . print_r( dbinstall::get_db_conn(), true ) . '</pre>';
 			redirect( 'app.php' );
+			//header("Refresh:0; url=app.php");
 			exit( 0 );
 		}
-		if ( ! $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] !== '/index.php' ) {
+//		if ( ! $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] !== '/index.php' ) {
+//			$this->init();
+//			redirect( 'index.php' );
+//			echo '<pre>' . print_r( dbinstall::get_db_conn() . 'are we here', true ) . '</pre>';
+//			exit( 0 );
+//
+//		}
+//
+//		if ( ! $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/index.php' ) {
+//			$this->init();
+//			echo '<pre>' . print_r( dbinstall::get_db_conn(), true ) . '</pre>';
+//
+//		}
+//
+//		if ( $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/app.php' ) {
+//			die();
+//		}
+		if ( ! self::get_db_conn() ) {
 			$this->init();
-			redirect( 'index.php' );
-			echo '<pre>' . print_r( dbinstall::get_db_conn() . 'are we here', true ) . '</pre>';
-			exit( 0 );
-			
-		}
-		
-		if ( ! $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/index.php' ) {
-			$this->init();
-			echo '<pre>' . print_r( dbinstall::get_db_conn(), true ) . '</pre>';
-			
-		}
-		
-		if ( $this->fetch_connection() && $_SERVER[ 'REQUEST_URI' ] === '/app.php' ) {
-			die();
 		}
 		
 	}
@@ -69,28 +73,23 @@ class dbinstall extends create_db {
 	}
 	
 	/**
-	 * Put the jSon information from the $_POST variable
+	 * Put array into jSon file
 	 *
-	 * @param $host
-	 * @param $db_name
-	 * @param $root_username
-	 * @param $root_password
-	 * @param $db_username
-	 * @param $db_password
+	 * @param $args
 	 *
 	 * @return void
 	 */
-	private function put_Json_content( $host, $db_name, $root_username, $root_password, $db_username, $db_password ) {
+	private function put_Json_content( array $args ) {
 		$json_file = ABSPATH . 'assets/json/db-info.json';
 		$json_raw  = file_get_contents( $json_file );
 		$json      = json_decode( $json_raw );
 		$json      = [
-			'host'          => $host,
-			'db_name'       => $db_name,
-			'root_username' => $root_username,
-			'root_password' => $root_password,
-			'db_username'   => $db_username,
-			'db_password'   => $db_password
+			'host'          => $args[ 'host' ],
+			'db_name'       => $args[ 'db_name' ],
+			'root_username' => $args[ 'root_username' ],
+			'root_password' => $args[ 'root_password' ],
+			'db_username'   => $args[ 'db_username' ],
+			'db_password'   => $args[ 'db_password' ]
 		
 		];
 		$json_out  = json_encode( $json );
@@ -126,7 +125,14 @@ class dbinstall extends create_db {
 			//make connection and access db to check if there's already a database created with given name from $dbname
 			
 			if ( ! $this->access_db( $servername, $dbname, $username, $password ) ) {
-				echo $this->error_code = 'No connection! Please check your connection details at file db-info.json or check if database/username exists';
+				//check this functionality cause it creates a database and repopulates stuff
+				try {
+					$this->createDB( $json );
+					$this->createTables( $json );
+				} catch ( PDOException $e ) {
+					echo $this->error_code = 'No connection! Please check your connection details at file db-info.json or check if database/username exists';
+					$e->getMessage();
+				}
 				
 				return false;
 				
@@ -199,11 +205,11 @@ class dbinstall extends create_db {
 			
 			//if(isset ( $_POST[ 'submit' ] )) {
 			//add details to Json before creating db/tables to store info, since nonce return true
-			$json_details = $this->form_post_details( $_POST[ 'host' ], $_POST[ 'db_name' ], $_POST[ 'root_username' ], $root_password, $_POST[ 'db_username' ], $_POST[ 'db_password' ] );
+			$json_details = $this->form_post_details( $_POST, $root_password );
 			
 			//Create db and tables if db is not existent
-			$this->createDB( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ], $json_details[ 'db_username' ], $json_details[ 'db_password' ] );
-			$this->createTables( $json_details[ 'host' ], $json_details[ 'db_name' ], $json_details[ 'root_username' ], $json_details[ 'root_password' ] );
+			$this->createDB( $json_details );
+			$this->createTables( $json_details );
 			redirect( 'app.php' );
 			
 			return true;
@@ -243,16 +249,21 @@ class dbinstall extends create_db {
 	}
 	
 	/**
+	 *  The form post details - put into json and return an array with same args
+	 *
+	 * @param array $args // The array with args
+	 * @param $root_password // Password passed with htmlargs
+	 *
 	 * @return array
 	 */
-	private function form_post_details( $host, $db_name, $root_username, $root_password, $db_username, $db_password ) {
-		$json[ 'host' ]          = $host;
-		$json[ 'db_name' ]       = $db_name;
-		$json[ 'root_username' ] = $root_username;
+	private function form_post_details( $args, $root_password ) {
+		$json[ 'host' ]          = $args[ 'host' ];
+		$json[ 'db_name' ]       = $args[ 'db_name' ];
+		$json[ 'root_username' ] = $args[ 'root_username' ];
 		$json[ 'root_password' ] = $root_password;
-		$json[ 'db_username' ]   = $db_username;
-		$json[ 'db_password' ]   = $db_password;
-		$this->put_Json_content( $host, $db_name, $root_username, $root_password, $db_username, $db_password );
+		$json[ 'db_username' ]   = $args[ 'db_username' ];
+		$json[ 'db_password' ]   = $args[ 'db_password' ];
+		$this->put_Json_content( $args );
 		
 		return $json;
 	}

@@ -36,22 +36,17 @@ abstract class create_db {
 	}
 	
 	/**
-	 * @param $servername
-	 * @param $dbname
-	 * @param $root_username
-	 * @param $root_password
-	 * @param $db_username
-	 * @param $db_password
+	 * @param array $args
 	 *
 	 * @return void
 	 */
-	protected function createDB( $servername, $dbname, $root_username, $root_password, $db_username, $db_password ) {
+	protected function createDB( array $args ) {
 		try {
-			$conn = $this->PDO_connection( $servername, $root_username, $root_password );
+			$conn = $this->PDO_connection( $args[ 'host' ], $args[ 'root_username' ], $args[ 'root_password' ] );
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-			$sql = "CREATE DATABASE IF NOT EXISTS `$dbname`;
-                    CREATE USER IF NOT EXISTS `$db_username`@'%' IDENTIFIED BY '$db_password';
-                    GRANT ALL ON `$dbname`.* TO '$db_username'@'%';
+			$sql = "CREATE DATABASE IF NOT EXISTS `{$args['db_name']}`;
+                    CREATE USER IF NOT EXISTS `{$args['db_username']}`@'%' IDENTIFIED BY '{$args['db_password']}';
+                    GRANT ALL ON `{$args['db_name']}`.* TO '{$args['db_username']}'@'%';
                     FLUSH PRIVILEGES;";
 			// use exec() because no results are returned
 			$conn->exec( $sql );
@@ -133,17 +128,14 @@ abstract class create_db {
 	}
 	
 	/**
-	 * @param $servername
-	 * @param $dbname
-	 * @param $username
-	 * @param $password
+	 * @param $args
 	 *
 	 * @return void
 	 */
-	protected function createTables( $servername, $dbname, $username, $password ) {
+	protected function createTables( array $args ) {
 		
 		try {
-			$conn                     = $this->PDO_connection( $servername, $username, $password, $dbname, false );
+			$conn                     = $this->PDO_connection( $args[ 'host' ], $args[ 'root_username' ], $args[ 'root_password' ], $args[ 'db_name' ], false );
 			$create_tables_into_array = [
 				$this->create_table_attendee(),
 				$this->create_table_specialties(),
