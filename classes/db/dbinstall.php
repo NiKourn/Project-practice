@@ -12,12 +12,6 @@ class dbinstall extends create_db {
 	private static $conn;
 	
 	/**
-	 * insert create_db object into constructor and load it as a parameter
-	 * @var create_db object
-	 */
-	private $create_db;
-	
-	/**
 	 * Store Json file to check if its empty throughout class
 	 * @var json_file not needed yet...
 	 */
@@ -41,7 +35,7 @@ class dbinstall extends create_db {
 				exit();
 			}
 		}
-
+		
 	}
 	
 	/**
@@ -79,12 +73,15 @@ class dbinstall extends create_db {
 	}
 	
 	/**
-	 * Decode our Json file and use it to extract the array in dbform
+	 * Decode json into an array or an object
+	 *
+	 * @param $array // false for object, true for array
+	 *
 	 * @return mixed
 	 */
-	public static function jSon_decode() {
+	public static function jSon_decode( $array = false ) {
 		$json_file = file_get_contents( ABSPATH . 'assets/json/db-info.json' );
-		$json      = json_decode( $json_file );
+		$json      = json_decode( $json_file, $array );
 		
 		return $json;
 	}
@@ -95,9 +92,8 @@ class dbinstall extends create_db {
 	 * @return false|mixed|string|void
 	 */
 	private function fetch_connection() {
-		$get_json = file_get_contents( ABSPATH . 'assets/jSon/db-info.json' );
-		$json     = json_decode( $get_json, true ); // decode the JSON into an associative array
-		
+//		get json and decode
+		$json            = self::jSon_decode( true );// decode the JSON into an associative array
 		$this->json_file = $json;
 		
 		try {
@@ -111,28 +107,26 @@ class dbinstall extends create_db {
 			$stmt->execute();
 			$stmt_fetch = $stmt->fetch();
 			self::$conn = $stmt_fetch;
-			if ( self::$conn ) {
-				return '<br><h2>Database Already Created, Redirecting...</h2>';
-			}
 			
 			return $stmt_fetch;
-		} catch ( PDOException $e ) {
+		} catch ( Exception $e ) {
 			$e->getMessage();
 		}
 		
 	}
 	
 	/**
+	 * Build the dB with default options
+	 *
 	 * @return true|void
 	 */
-	private
-	function build_db() {
+	private function build_db() {
 		if ( $_SERVER[ 'REQUEST_URI' ] !== '/index.php' ) {
 			redirect( 'index.php' );
 			exit( 0 );
 		}
 		
-		echo 'Something not right';
+		echo 'ERROR OUT make a class with errors';
 		if ( ! $this->nonce_validation() ) {
 			$this->error_code = 'Nonce validation failed';
 			
@@ -140,10 +134,15 @@ class dbinstall extends create_db {
 		}
 		if ( isset( $_POST ) ) {
 			$root_password = htmlspecialchars( $_POST[ 'root_password' ] );
-			//add details to Json before creating db/tables to store info, since nonce return true
+			//add details to Json before creating db/tables to store info, since nonce returns true and $_POST global isset
+//			if( self::$conn ){
+//				$this->put_json_content( $_POST, $root_password );
+//				echo 'check credentials for error file';
+//				return;
+//			}
 			$json_details = $this->put_json_content( $_POST, $root_password );
 			
-			//Create db and tables if db is not existent only from form
+			//Create db and tables if db is not existent only from form!
 			$this->createDB( $json_details );
 			$this->createTables( $json_details );
 			redirect( 'app.php' );
