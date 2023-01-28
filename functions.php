@@ -13,7 +13,6 @@ function get_var( &$var, $default = null ) {
  */
 function redirect( string $url, int $delay_in_milisecs = 0 ) {
 	$string = '<script type="text/javascript">';
-//	$string .= 'window.location.href = "' . $url . '"';
 	$string .= 'setTimeout(function () {
        window.location.href = "' . $url . '"
     }, "' . $delay_in_milisecs . '");';
@@ -42,10 +41,10 @@ function redirect_if_db_exists() {
 	if ( dbinstall::get_db_conn() && $_SERVER[ 'REQUEST_URI' ] === '/index.php' ) {
 		clear_html_contents();
 		echo '<pre>' . print_r( dbinstall::get_db_conn(), true ) . '</pre>';
-		redirect( 'app.php' );
+		redirect( 'app' );
 	}
 	if ( ! dbinstall::get_db_conn() && $_SERVER[ 'REQUEST_URI' ] !== '/index.php' ) {
-		redirect( 'index.php' );
+		redirect( '/' );
 		exit( 0 );
 	}
 }

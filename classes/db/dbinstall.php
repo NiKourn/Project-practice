@@ -30,8 +30,8 @@ class dbinstall extends create_db {
 			$this->init();
 			exit();
 		} else {
-			if ( $_SERVER[ 'REQUEST_URI' ] !== '/app.php' ) {
-				redirect( '/app.php' );
+			if ( $_SERVER[ 'REQUEST_URI' ] !== '/app.php' && ($_SERVER[ 'REQUEST_URI' ] === '/index.php' || $_SERVER[ 'REQUEST_URI' ] === '/') ) {
+				redirect( 'app' );
 				exit();
 			}
 		}
@@ -121,9 +121,9 @@ class dbinstall extends create_db {
 	 * @return true|void
 	 */
 	private function build_db() {
-		if ( $_SERVER[ 'REQUEST_URI' ] !== '/index.php' ) {
-			redirect( 'index.php' );
-			exit( 0 );
+		if ( $_SERVER[ 'HTTP_HOST' ] !== DOMAIN ) {
+			redirect( $_SERVER[ 'HTTP_HOST' ] );
+			exit();
 		}
 		
 		echo 'ERROR OUT make a class with errors';
@@ -145,7 +145,7 @@ class dbinstall extends create_db {
 			//Create db and tables if db is not existent only from form!
 			$this->createDB( $json_details );
 			$this->createTables( $json_details );
-			redirect( 'app.php' );
+			redirect( 'app' );
 			exit();
 		}
 		

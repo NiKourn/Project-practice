@@ -7,6 +7,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/' );
 }
+
+// Domain name constant
+define ('DOMAIN', 'practice.local');
 define('NONCE_SECRET', 'CEIUHET745T$^&%&%^gFGBF$^');
 /*
  * The error_reporting() function can be disabled in php.ini. On systems where that is the case,
