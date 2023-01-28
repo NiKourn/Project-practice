@@ -1,4 +1,12 @@
-## Remove .php-extension from url
-#RewriteEngine on
-#RewriteCond %{REQUEST_FILENAME}.php -f
-#RewriteRule ^(.*)$ $1.php
+IndexIgnore * # prevent directory listing
+
+Order deny,allow
+Allow from *
+
+# ------------------------------------------
+# Rewrite so that php extentions are not shown
+RewriteEngine on
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php

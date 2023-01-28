@@ -3,7 +3,6 @@
 echo "<div class='row'>";
 //Reload this page and do the posting action on this page
 //htmlentities can strip down the exploitation by hackers
-$json = dbinstall::jSon_decode();
 ?>
 <form action="<?php echo htmlentities( $_SERVER[ 'PHP_SELF' ] ); ?>" method="post" enctype="multipart/form-data">
 	<div class="mb-3">

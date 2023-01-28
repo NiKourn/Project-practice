@@ -15,9 +15,9 @@ abstract class create_db {
 	 *
 	 * @return PDO|void
 	 */
-	public function PDO_connection( $servername, $username, $password, $dbname = '', $before_creating_db = true ) {
+	public function PDO_connection( $args, $before_creating_db = true ) {
 		if ( $before_creating_db === true ) {
-			$conn = new PDO( "mysql:host=$servername;", $username, $password );
+			$conn = new PDO( "mysql:host={$args[ 'host' ]};", $args[ 'db_username' ], $args[ 'db_password' ] );
 			// set the PDO error mode to exception
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 			
@@ -25,7 +25,7 @@ abstract class create_db {
 			
 		} else {
 			
-			$conn = new PDO( "mysql:host=$servername;dbname=$dbname", $username, $password );
+			$conn = new PDO( "mysql:host={$args[ 'host' ]};dbname={$args[ 'db_name' ]}", $args[ 'db_username' ], $args[ 'db_password' ] );
 			// set the PDO error mode to exception
 			//PDO::ATTR_PERSISTENT => true;
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -42,7 +42,7 @@ abstract class create_db {
 	 */
 	protected function createDB( array $args ) {
 		try {
-			$conn = $this->PDO_connection( $args[ 'host' ], $args[ 'root_username' ], $args[ 'root_password' ] );
+			$conn = $this->PDO_connection( $args );
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 			$sql = "CREATE DATABASE IF NOT EXISTS `{$args['db_name']}`;
                     CREATE USER IF NOT EXISTS `{$args['db_username']}`@'%' IDENTIFIED BY '{$args['db_password']}';
@@ -122,7 +122,7 @@ abstract class create_db {
 	 * @return string
 	 */
 	private function create_table_specialties_values() {
-		$query = "INSERT INTO `specialties`(`name`) VALUES ('Database Admin'), ('Software Devs'), ('Server Admins'), ('Other')";
+		$query = "INSERT INTO IF NOT EXISTS `specialties`(`name`) VALUES ('Database Admin'), ('Software Devs'), ('Server Admins'), ('Other')";
 		
 		return $query;
 	}
@@ -135,7 +135,7 @@ abstract class create_db {
 	protected function createTables( array $args ) {
 		
 		try {
-			$conn                     = $this->PDO_connection( $args[ 'host' ], $args[ 'root_username' ], $args[ 'root_password' ], $args[ 'db_name' ], false );
+			$conn                     = $this->PDO_connection( $args, false );
 			$create_tables_into_array = [
 				$this->create_table_attendee(),
 				$this->create_table_specialties(),
