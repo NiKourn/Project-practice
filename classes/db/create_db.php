@@ -40,7 +40,7 @@ abstract class create_db {
 	 *
 	 * @return void
 	 */
-	protected function createDB( array $args ) {
+	protected function create_db( array $args ) {
 		try {
 			$conn = $this->PDO_connection( $args );
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -132,7 +132,7 @@ abstract class create_db {
 	 *
 	 * @return void
 	 */
-	protected function createTables( array $args ) {
+	protected function create_tables( array $args ) {
 		
 		try {
 			$conn                     = $this->PDO_connection( $args, false );

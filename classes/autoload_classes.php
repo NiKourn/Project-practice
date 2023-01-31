@@ -13,7 +13,7 @@ class autoLoad {
 	 * @var array|string[]
 	 */
 	private array $filenames_needles = [
-		'nonce', 'db'
+		'nonce', 'error', 'db'
 	];
 	
 	public function __construct() {

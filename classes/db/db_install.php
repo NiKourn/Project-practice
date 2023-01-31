@@ -3,7 +3,7 @@
 /**
  * Creates database from jSon file
  */
-class dbinstall extends create_db {
+class db_install extends create_db {
 	
 	/**
 	 * Connection return
@@ -20,7 +20,7 @@ class dbinstall extends create_db {
 	/**
 	 * @var
 	 */
-	private $error_code;
+	private $error_msg;
 	
 	
 	function __construct() {
@@ -30,7 +30,7 @@ class dbinstall extends create_db {
 			$this->init();
 			exit();
 		} else {
-			if ( $_SERVER[ 'REQUEST_URI' ] !== '/app.php' && ($_SERVER[ 'REQUEST_URI' ] === '/index.php' || $_SERVER[ 'REQUEST_URI' ] === '/') ) {
+			if ( $_SERVER[ 'REQUEST_URI' ] !== '/app.php' && ( $_SERVER[ 'REQUEST_URI' ] === '/index.php' || $_SERVER[ 'REQUEST_URI' ] === '/' ) ) {
 				redirect( 'app' );
 				exit();
 			}
@@ -87,9 +87,9 @@ class dbinstall extends create_db {
 	}
 	
 	/**
-	 * Fetch dB to check if we have a connection/db
+	 * Fetch dB to check if we have a connection/db#
 	 *
-	 * @return false|mixed|string|void
+	 * @return mixed|void
 	 */
 	private function fetch_connection() {
 //		get json and decode
@@ -100,9 +100,7 @@ class dbinstall extends create_db {
 			$db    = $this->PDO_connection( $json, false );
 			$query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME=?";
 			$stmt  = $db->prepare( $query );
-			if ( $stmt === false ) {
-				return false;
-			}
+			
 			$stmt->bindparam( 1, $json[ 'db_name' ] );
 			$stmt->execute();
 			$stmt_fetch = $stmt->fetch();
@@ -110,7 +108,10 @@ class dbinstall extends create_db {
 			
 			return $stmt_fetch;
 		} catch ( Exception $e ) {
-			$e->getMessage();
+			
+			trigger_error($e->getMessage(), E_USER_WARNING);
+			//Errors_app::add_error_msg('connection', $e->getMessage());
+			return;
 		}
 		
 	}
@@ -121,14 +122,12 @@ class dbinstall extends create_db {
 	 * @return true|void
 	 */
 	private function build_db() {
-		if ( $_SERVER[ 'HTTP_HOST' ] !== DOMAIN ) {
-			redirect( $_SERVER[ 'HTTP_HOST' ] );
+		if ( $_SERVER[ 'PHP_SELF' ] !== '/index.php' ) {
+			redirect( '/' );
 			exit();
 		}
 		
-		echo 'ERROR OUT make a class with errors';
 		if ( ! $this->nonce_validation() ) {
-			$this->error_code = 'Nonce validation failed';
 			
 			return;
 		}
@@ -143,8 +142,8 @@ class dbinstall extends create_db {
 			$json_details = $this->put_json_content( $_POST, $root_password );
 			
 			//Create db and tables if db is not existent only from form!
-			$this->createDB( $json_details );
-			$this->createTables( $json_details );
+			$this->create_db( $json_details );
+			$this->create_tables( $json_details );
 			redirect( 'app' );
 			exit();
 		}
@@ -165,14 +164,14 @@ class dbinstall extends create_db {
 		$testnonce = $nonce->verifyNonce( $token );
 		//if verification is false die
 		if ( ! $testnonce ) {
-			echo $this->error_code = 'Form validation is incomplete';
+			echo $this->error_msg = 'Form validation is incomplete';
 			
 			return;
 		}
 		
 		//if empty session return false
 		if ( ( ! isset( $_SESSION[ 'nonce' ][ 'dbform' ] ) ) ) {
-			echo $this->error_code = 'Form is not submitted, something is wrong with the form token';
+			echo $this->error_msg = 'Form is not submitted, something is wrong with the form token';
 			
 			return;
 		}
@@ -196,11 +195,6 @@ class dbinstall extends create_db {
 		
 	}
 	
-	private function error_code_msg( $no, $message ) {
-		return $this->error_code = $message . $no;
-	}
-	
-	
 }
 
-new dbinstall();
+new db_install();
