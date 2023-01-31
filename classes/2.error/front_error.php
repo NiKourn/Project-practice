@@ -13,15 +13,16 @@ class Custom_errors {
 			'<div class="alert alert-warning d-flex align-items-center" role="alert">
   <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
   <div>
-    <b>Custom error:</b> ['. $errno .'] '. $errstr .'<br>Error on line' . $errline .' in ' .$errfile . '<br>
+    <b>Custom error:</b> ['. $errno .'] '. $errstr .'<br>Error on line ' . $errline .' in ' .$errfile . '<br>
   </div>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
-			echo "<b>Custom error:</b> [$errno] $errstr<br>";
-			echo " Error on line $errline in $errfile<br></div>";
 		}
+		
+		if ($errno === E_USER_NOTICE ){
 		echo "<div class='alert alert-warning' role='alert'><b>Custom error:</b> [$errno] $errstr<br>";
 		echo " Error on line $errline in $errfile<br></div>";
+		}
 	}
 	
 	
