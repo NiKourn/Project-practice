@@ -21,7 +21,6 @@ class includeLoader {
 	 */
 	public static function include( $file_name, $title = '' ) {
 		include_once self::$folder_path . $file_name . '.php';
-		//self::$title = $title;
 	}
 	
 	public static function get_title(){

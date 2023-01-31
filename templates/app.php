@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/load.php';
+require __DIR__ . '/../load.php';
 includeLoader::include( 'header', 'App 1Title' );
 echo '<pre>' . print_r(db_install::get_db_conn(), true) . '</pre>';
 echo '<h1>App Page: Connection with db succesfull</h1>';

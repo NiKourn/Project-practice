@@ -2,23 +2,33 @@
  A practice project (will be renamed later)
 
 ## TODO
-- Need to create ? child classes for getting db and checking if tables are spooled and populated, need to think of hierarchy of how it's going to be working with the db (install, create, get, insert etc)
-- Need to implement a head class that is inserting everything (pretty much done)
-- Need to rethink how Title is going to work (maybe another class or function)
-- Need to insert option_value and option_name in options table
-- Need to make SQL statements for a bunch of stuff
-- Search for actions or something to run stuff from different parts of the theme
-- Write a class for erroring with bootstrap stuff
-- Need to calculate how dbinstall will run maybe not in constructor but init() at header maybe and check at constructor for the db everytime else nothing runs
-- Redirects logic needs work at dbinstall class on constructor
 
-### v beta0.1.0
+- Need to insert option_value and option_name in options table
+- Need to make SQL statements like:
+- Need thought for styling with Sass and Css and how templates are going to work (loads of work to do)
+- Need redirects fixing better (install instead of index) and need to move template files maybe and everything running from app (templating)
+
+## Beta v0.1.0
+
+- Redirect logic fixed
+- Configured custom erroring system
+- Fixed db_install class to work better
+- Installed packages sass, bootstrap with dependencies & compiler
 - Fixed nonce working
+- Reworked code with arrays instead of multiple vars
+- db_install child of create_db
 - Reworked PDO connection erroring
-- Fixed redirects (pending)
 - When docker implementation is done, finish feature into develop branch
-- Redirect implemented
+- Redirect implemented (needs fixing)
 - Docker implementation and bug fixes regarding database creation
-- Created dbinstall and create_db classes
+- Created db_install and create_db classes
 - Create database automatically with jSon (db-info.json) over dbinstall class
 - Create file structure
+
+
+## Terminal commands help
+
+#### Compile sass with watching folders Watching Folders:
+
+Compile sass:
+`sass --watch assets/src/scss/:assets/css/`

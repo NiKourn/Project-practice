@@ -2,7 +2,6 @@
 require __DIR__ . '/load.php';
 includeLoader::include( 'header', 'Project title' );
 
-echo "<div class='' style='border:1px solid black;height : 500px;'>TEST TEST</div>";
 //autoload initialized classes like db built and fetch
 //echo '<pre>' . print_r(dbinstall::get_db_conn(), true) . '</pre>';
 //if ( dbinstall::get_db_conn() ) {
@@ -21,4 +20,3 @@ echo "<div class='' style='border:1px solid black;height : 500px;'>TEST TEST</di
 //}
 //echo "</div>";
 
-includeLoader::include( 'footer' );

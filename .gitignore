@@ -5,3 +5,5 @@
 .idea/php.xml
 .idea/modules.xml
 assets/jSon/db-info.json
+node_modules
+/vendor/

@@ -26,12 +26,21 @@ class db_install extends create_db {
 	function __construct() {
 		parent::__construct();
 		
+		//redirect without extension if extension is entered (stick it somewhere in code & make a templates file to stick there all the templates)
+		foreach (glob('*.php') as $page_ext){
+			if ( $_SERVER[ 'REQUEST_URI' ] === '/'.$page_ext) {
+				foreach (str_replace('.php','', glob('*.php') ) as $page){
+					redirect($page);
+				}
+			}
+		}
+		
 		if ( ! $this->fetch_connection() ) {
 			$this->init();
 			exit();
 		} else {
-			if ( $_SERVER[ 'REQUEST_URI' ] !== '/app.php' && ( $_SERVER[ 'REQUEST_URI' ] === '/index.php' || $_SERVER[ 'REQUEST_URI' ] === '/' ) ) {
-				redirect( 'app' );
+			if ( $_SERVER[ 'REQUEST_URI' ] !== '/templates/app.php' && ( $_SERVER[ 'REQUEST_URI' ] === '/install' || $_SERVER[ 'REQUEST_URI' ] === '/' ) ) {
+				redirect( '/templates/app' );
 				exit();
 			}
 		}
@@ -122,13 +131,12 @@ class db_install extends create_db {
 	 * @return true|void
 	 */
 	private function build_db() {
-		if ( $_SERVER[ 'PHP_SELF' ] !== '/index.php' ) {
-			redirect( '/' );
+		if ( $_SERVER[ 'PHP_SELF' ] !== '/install.php' ) {
+			redirect( 'install' );
 			exit();
 		}
 		
 		if ( ! $this->nonce_validation() ) {
-			
 			return;
 		}
 		if ( isset( $_POST ) ) {
@@ -177,6 +185,7 @@ class db_install extends create_db {
 		}
 		
 		if ( ! isset( $_POST[ 'host' ] ) || ! isset( $_POST[ 'db_name' ] ) ) {
+			trigger_error('Form is not submitted', E_USER_WARNING);
 			return;
 		}
 		
